@@ -12,7 +12,7 @@ import { validate } from './validation/validate';
   const options = getOptions(process.argv);
 
   if (options.help) {
-    showHelp();
+    showHelp(options);
     process.exit(0);
   }
 
