@@ -11,18 +11,26 @@ import { getPackageInfos } from '../monorepo/getPackageInfos';
 import { getPackageGroups } from '../monorepo/getPackageGroups';
 import { getDisallowedChangeTypes } from '../changefile/getDisallowedChangeTypes';
 import { areChangeFilesDeleted } from './areChangeFilesDeleted';
-import { validatePackageDependencies } from '../publish/validatePackageDependencies';
+import { validatePackageDependencies } from './validatePackageDependencies';
 import { gatherBumpInfo } from '../bump/gatherBumpInfo';
+import { validatePackageVersions } from './validatePackageVersions';
 
-type ValidationOptions = { allowMissingChangeFiles: boolean; allowFetching: boolean };
+type ValidationOptions = {
+  allowMissingChangeFiles: boolean;
+  /** Whether to allow parts of validation which run `git fetch` (does not affect fetching from npm registry) */
+  allowFetching: boolean;
+};
 type PartialValidateOptions = Partial<ValidationOptions>;
 const defaultValidationOptions: ValidationOptions = {
   allowMissingChangeFiles: false,
   allowFetching: true,
 };
 
-export function validate(options: BeachballOptions, validateOptionsOverride?: PartialValidateOptions) {
-  const validateOptions: ValidationOptions = Object.assign({}, defaultValidationOptions, validateOptionsOverride || {});
+export async function validate(options: BeachballOptions, validateOptionsOverride?: PartialValidateOptions) {
+  const validateOptions: ValidationOptions = {
+    ...defaultValidationOptions,
+    ...validateOptionsOverride,
+  };
 
   // Validation Steps
   if (!isGitAvailable(options.path)) {
@@ -107,6 +115,10 @@ Consider one of the following solutions:
 - If it should NOT be published, verify that it is only listed under devDependencies of published packages.
 `);
       process.exit(1);
+    }
+
+    if (!(await validatePackageVersions(bumpInfo, options.registry))) {
+      process.exit(1); // validatePackageVersions prints the error message
     }
   }
 

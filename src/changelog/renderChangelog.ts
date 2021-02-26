@@ -30,9 +30,10 @@ export async function renderChangelog(renderOptions: MarkdownChangelogRenderOpti
   }
 
   try {
-    if (customRenderPackageChangelog || customRenderers) {
-      console.log('Using custom renderer for package version changelog.');
-    }
+    // TODO: add back later if we add a verbose logging level
+    // if (customRenderPackageChangelog || customRenderers) {
+    //   console.log(`Using custom renderer for ${newVersionChangelog.name} changelog.`);
+    // }
 
     const renderInfo: PackageChangelogRenderInfo = {
       previousJson,

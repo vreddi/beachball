@@ -1,4 +1,4 @@
-import { validatePackageDependencies } from '../../publish/validatePackageDependencies';
+import { validatePackageDependencies } from '../../validation/validatePackageDependencies';
 import { BumpInfo } from '../../types/BumpInfo';
 import _ from 'lodash';
 

@@ -4,11 +4,11 @@ import { performBump } from '../bump/performBump';
 import { BumpInfo } from '../types/BumpInfo';
 import { BeachballOptions } from '../types/BeachballOptions';
 import { packagePublish } from '../packageManager/packagePublish';
-import { validatePackageVersions } from './validatePackageVersions';
+import { validatePackageVersions } from '../validation/validatePackageVersions';
 import { displayManualRecovery } from './displayManualRecovery';
 import { toposortPackages } from './toposortPackages';
-import { shouldPublishPackage } from './shouldPublishPackage';
-import { validatePackageDependencies } from './validatePackageDependencies';
+import { shouldPublishPackage } from '../validation/shouldPublishPackage';
+import { validatePackageDependencies } from '../validation/validatePackageDependencies';
 
 export async function publishToRegistry(originalBumpInfo: BumpInfo, options: BeachballOptions) {
   const { registry, token, access, timeout } = options;

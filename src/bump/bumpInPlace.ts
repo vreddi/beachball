@@ -10,7 +10,7 @@ import { ChangeInfo } from '../types/ChangeInfo';
 /**
  * Updates BumpInfo according to change types, bump deps, and version groups
  *
- * NOTE: THIS FUNCTION MUTATES STATE!
+ * NOTE: THIS FUNCTION MUTATES `bumpInfo`! (does not modify any files on disk)
  */
 export function bumpInPlace(bumpInfo: BumpInfo, options: BeachballOptions) {
   const { bumpDeps } = options;
@@ -30,7 +30,9 @@ export function bumpInPlace(bumpInfo: BumpInfo, options: BeachballOptions) {
 
   // pass 2: actually bump the packages in the bumpInfo in memory (no disk writes at this point)
   Object.keys(packageChangeTypes).forEach(pkgName => {
-    bumpPackageInfoVersion(pkgName, bumpInfo, options);
+    if (bumpPackageInfoVersion(pkgName, bumpInfo, options)) {
+      console.log(`Bumping ${pkgName} to ${bumpInfo.packageInfos[pkgName]!.version}`);
+    }
   });
 
   // pass 3: update the dependentChangeInfos with relevant comments
