@@ -11,8 +11,10 @@ import path from 'path';
 
 function gatherPreBumpInfo(options: BeachballOptions): BumpInfo {
   const { path: cwd } = options;
+  // function gatherPreBumpInfo(options: BetterOptions): BumpInfo {
+  //   const cwd = resolveOption('path', options);
   // Collate the changes per package
-  const packageInfos = getPackageInfos(cwd);
+  const packageInfos = getPackageInfos(cwd, options);
   const changes = readChangeFiles(options);
   const changePath = getChangePath(cwd);
 
@@ -60,7 +62,7 @@ function gatherPreBumpInfo(options: BeachballOptions): BumpInfo {
   };
 }
 
-export function gatherBumpInfo(options: BeachballOptions): BumpInfo {
+export function gatherBumpInfo(options: BeachballOptions, rawOptions: BeachballOptions): BumpInfo {
   const bumpInfo = gatherPreBumpInfo(options);
   bumpInPlace(bumpInfo, options);
   return bumpInfo;

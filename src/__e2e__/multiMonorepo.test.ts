@@ -3,9 +3,8 @@ import path from 'path';
 import { RepositoryFactory } from '../fixtures/repository';
 import { getChangedPackages } from '../changefile/getChangedPackages';
 import { writeChangeFiles } from '../changefile/writeChangeFiles';
-import { git } from 'workspace-tools';
+import { git, getPackageInfos as getBasicPackageInfos } from 'workspace-tools';
 import { bump } from '../commands/bump';
-import { getPackageInfos } from '../monorepo/getPackageInfos';
 import { BeachballOptions } from '../types/BeachballOptions';
 import { getChangePath } from '../paths';
 import { MultiMonoRepoFactory } from '../fixtures/multiMonorepo';
@@ -110,8 +109,8 @@ describe('version bumping', () => {
 
     await bump({ path: repoARoot, bumpDeps: true } as BeachballOptions);
 
-    const packageInfosA = getPackageInfos(repoARoot);
-    const packageInfosB = getPackageInfos(repoBRoot);
+    const packageInfosA = getBasicPackageInfos(repoARoot);
+    const packageInfosB = getBasicPackageInfos(repoBRoot);
     expect(packageInfosA['foo'].version).toBe('1.1.0');
     expect(packageInfosB['foo'].version).toBe('1.0.0');
 

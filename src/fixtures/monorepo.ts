@@ -4,7 +4,7 @@ import * as fs from 'fs-extra';
 import { tmpdir } from './tmpdir';
 import { BeachballOptions } from '../types/BeachballOptions';
 import { Repository, RepositoryFactory } from './repository';
-import { PackageJson } from '../types/PackageInfo';
+import { PackageJson } from '../types/BeachballPackageInfo';
 import { git } from 'workspace-tools';
 
 export const packageJsonFixtures: { [path: string]: PackageJson } = {

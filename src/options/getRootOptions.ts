@@ -1,7 +1,10 @@
 import { cosmiconfigSync } from 'cosmiconfig';
+import { getDefaultRemoteBranch } from 'workspace-tools';
 import { RepoOptions, CliOptions } from '../types/BeachballOptions';
 
-export function getRootOptions(cliOptions: CliOptions): RepoOptions {
+/** @internal */
+export function getRootOptions(cliOptions: Readonly<CliOptions>): RepoOptions {
+  let config: RepoOptions;
   if (cliOptions.configPath) {
     const repoOptions = tryLoadConfig(cliOptions.configPath);
     if (!repoOptions) {
@@ -9,10 +12,16 @@ export function getRootOptions(cliOptions: CliOptions): RepoOptions {
       process.exit(1);
     }
 
-    return repoOptions;
+    config = repoOptions;
+  } else {
+    config = trySearchConfig() || {};
   }
 
-  return trySearchConfig() || {};
+  if (!config.branch && !cliOptions.branch) {
+    config.branch = getDefaultRemoteBranch('master', cliOptions.path, true /*strict*/);
+  }
+
+  return config;
 }
 
 function tryLoadConfig(configPath: string): RepoOptions {

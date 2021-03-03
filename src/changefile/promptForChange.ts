@@ -27,7 +27,7 @@ export async function promptForChange(options: BeachballOptions) {
     console.log('');
     console.log(`Please describe the changes for: ${pkg}`);
 
-    const disallowedChangeTypes = getDisallowedChangeTypes(pkg, packageInfos, packageGroups);
+    const disallowedChangeTypes = getDisallowedChangeTypes(packageInfos[pkg], packageGroups);
     const packageInfo = packageInfos[pkg];
     const showPrereleaseOption = prerelease(packageInfo.version);
     const changeTypePrompt: prompts.PromptObject<string> = {

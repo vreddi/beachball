@@ -1,14 +1,12 @@
 import { ChangeInfo, ChangeSet } from '../types/ChangeInfo';
-import { PackageInfo } from '../types/PackageInfo';
+import { PackageInfos } from 'workspace-tools';
 import { PackageChangelog } from '../types/ChangeLog';
 import { generateTag } from '../tag';
 
 export function getPackageChangelogs(
   changeSet: ChangeSet,
-  dependentChangeInfos: Array<ChangeInfo>,
-  packageInfos: {
-    [pkg: string]: PackageInfo;
-  }
+  dependentChangeInfos: ChangeInfo[],
+  packageInfos: PackageInfos
 ) {
   const changeInfos = Array.from(changeSet.values()).concat(dependentChangeInfos);
   const changelogs: {

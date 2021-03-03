@@ -1,4 +1,5 @@
 import { getMaxChangeType, MinChangeType, updateChangeInfoWithMaxType } from '../changefile/getPackageChangeTypes';
+import { resolveOption } from '../options/resolveOption';
 import { BumpInfo } from '../types/BumpInfo';
 import { ChangeInfo } from '../types/ChangeInfo';
 
@@ -17,6 +18,7 @@ export function updateRelatedChangeType(
   const { packageChangeTypes, packageGroups, dependents, packageInfos, dependentChangeTypes, groupOptions } = bumpInfo;
 
   const packageInfo = packageInfos[pkgName];
+  resolveOption();
   const disallowedChangeTypes = packageInfo.combinedOptions?.disallowedChangeTypes ?? [];
 
   let depChangeInfo = updateChangeInfoWithMaxType(

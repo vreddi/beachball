@@ -1,5 +1,5 @@
 import { BumpInfo } from '../types/BumpInfo';
-import { PackageDeps } from '../types/PackageInfo';
+import { PackageDeps } from 'workspace-tools';
 
 /**
  * Gets dependents for all packages

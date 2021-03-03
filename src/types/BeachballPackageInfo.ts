@@ -1,9 +1,10 @@
+import { PackageDeps, PackageInfo, PackageInfos } from 'workspace-tools';
 import { PackageOptions, BeachballOptions } from './BeachballOptions';
 import { ChangeType } from './ChangeInfo';
 
-export interface PackageDeps {
-  [dep: string]: string;
-}
+// export interface PackageDeps {
+//   [dep: string]: string;
+// }
 
 export interface PackageJson {
   name: string;
@@ -16,26 +17,20 @@ export interface PackageJson {
   beachball?: BeachballOptions;
 }
 
-export interface PackageInfo {
-  name: string;
-  packageJsonPath: string;
-  version: string;
-  dependencies?: PackageDeps;
-  devDependencies?: PackageDeps;
-  peerDependencies?: PackageDeps;
+/** Package info with additional beachball properties, including combined options */
+export interface BeachballPackageInfo extends PackageInfo {
   private: boolean;
 
-  /** options that are combined from the root configuration */
-  combinedOptions: PackageOptions;
+  // /** options that are combined from the root configuration */
+  // combinedOptions: PackageOptions;
 
   /** options that are SPECIFIC to the package from its configuration file (might be nothing) */
   packageOptions: Partial<PackageOptions>;
   group?: string;
 }
 
-export interface PackageInfos {
-  [pkgName: string]: PackageInfo;
-}
+/** Package infos with additional beachball properties, including combined options */
+export type BeachballPackageInfos = PackageInfos<BeachballPackageInfo>;
 
 export interface PackageGroupsInfo {
   packageNames: string[];

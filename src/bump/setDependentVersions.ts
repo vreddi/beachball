@@ -1,4 +1,4 @@
-import { PackageInfos, PackageDeps } from '../types/PackageInfo';
+import { PackageInfos, PackageDeps } from 'workspace-tools';
 import { bumpMinSemverRange } from './bumpMinSemverRange';
 
 export function setDependentVersions(packageInfos: PackageInfos, scopedPackages: Set<string>) {

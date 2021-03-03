@@ -2,6 +2,13 @@ import { ChangeType } from './ChangeInfo';
 import { ChangeFilePromptOptions } from './ChangeFilePrompt';
 import { ChangelogOptions } from './ChangelogOptions';
 
+export interface BetterOptions {
+  cwd: string;
+  defaultOptions: Partial<BeachballOptions>;
+  cliOptions: CliOptions;
+  repoOptions: RepoOptions;
+  packageOptions?: PackageOptions;
+}
 export type BeachballOptions = CliOptions & RepoOptions & PackageOptions;
 
 export interface CliOptions {
@@ -9,6 +16,7 @@ export interface CliOptions {
   branch: string;
   command: string;
   message: string;
+  /** cwd */
   path: string;
   registry: string;
   gitTags: boolean;
@@ -45,6 +53,7 @@ export interface CliOptions {
 export interface RepoOptions {
   branch: string;
   message: string;
+  /** cwd */
   path: string;
   registry: string;
   gitTags: boolean;
@@ -89,6 +98,7 @@ export interface PackageOptions {
   tag: string | null;
   defaultNpmTag: string;
   changeFilePrompt?: ChangeFilePromptOptions;
+  // For new properties to be respected, they MUST ALSO BE ADDED TO ...........
 }
 
 export interface VersionGroupOptions {
@@ -98,8 +108,12 @@ export interface VersionGroupOptions {
   /** minimatch pattern (or array of minimatch) to detect which packages should be excluded in this group */
   exclude?: string | string[];
 
-  disallowedChangeTypes: ChangeType[] | null;
-
   /** name of the version group */
   name: string;
+
+  // Properties that affect the beachball options within the group go under here.
+
+  disallowedChangeTypes: ChangeType[] | null;
+
+  // For new properties to be respected, they MUST ALSO BE ADDED TO ...........
 }

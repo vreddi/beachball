@@ -87,7 +87,7 @@ export function validate(options: BeachballOptions, validateOptionsOverride?: Pa
   const packageGroups = getPackageGroups(packageInfos, options.path, options.groups);
 
   for (const [changeFile, change] of changeSet) {
-    const disallowedChangeTypes = getDisallowedChangeTypes(change.packageName, packageInfos, packageGroups);
+    const disallowedChangeTypes = getDisallowedChangeTypes(packageInfos[change.packageName], packageGroups);
 
     if (!change.type || !isValidChangeType(change.type) || disallowedChangeTypes?.includes(change.type)) {
       console.error(

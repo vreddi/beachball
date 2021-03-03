@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import _ from 'lodash';
 import { ChangeInfo, ChangeSet } from '../types/ChangeInfo';
-import { PackageInfo } from '../types/PackageInfo';
+import { PackageInfo, PackageInfos } from 'workspace-tools';
 import { getPackageChangelogs } from './getPackageChangelogs';
 import { renderChangelog } from './renderChangelog';
 import { renderJsonChangelog } from './renderJsonChangelog';
@@ -14,10 +14,8 @@ import { mergeChangelogs } from './mergeChangelogs';
 export async function writeChangelog(
   options: BeachballOptions,
   changeSet: ChangeSet,
-  dependentChangeInfos: Array<ChangeInfo>,
-  packageInfos: {
-    [pkg: string]: PackageInfo;
-  }
+  dependentChangeInfos: ChangeInfo[],
+  packageInfos: PackageInfos
 ): Promise<void> {
   const groupedChangelogPaths = await writeGroupedChangelog(options, changeSet, dependentChangeInfos, packageInfos);
   const groupedChangelogPathSet = new Set(groupedChangelogPaths);
@@ -38,10 +36,8 @@ export async function writeChangelog(
 async function writeGroupedChangelog(
   options: BeachballOptions,
   changeSet: ChangeSet,
-  dependentChangeInfos: Array<ChangeInfo>,
-  packageInfos: {
-    [pkg: string]: PackageInfo;
-  }
+  dependentChangeInfos: ChangeInfo[],
+  packageInfos: PackageInfos
 ): Promise<string[]> {
   if (!options.changelog) {
     return [];

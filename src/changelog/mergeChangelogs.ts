@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { PackageChangelog } from '../types/ChangeLog';
-import { PackageInfo } from '../types/PackageInfo';
+import { PackageInfo } from 'workspace-tools';
 import { generateTag } from '../tag';
 import { ChangeType } from '../types/ChangeInfo';
 
@@ -10,7 +10,7 @@ import { ChangeType } from '../types/ChangeInfo';
  */
 export function mergeChangelogs(
   changelogs: PackageChangelog[],
-  masterPackage: PackageInfo
+  masterPackage: Pick<PackageInfo, 'name' | 'version'>
 ): PackageChangelog | undefined {
   if (changelogs.length < 1 || !masterPackage) {
     return undefined;

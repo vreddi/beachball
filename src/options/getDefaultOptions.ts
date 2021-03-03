@@ -1,9 +1,8 @@
 import { BeachballOptions } from '../types/BeachballOptions';
 
-export function getDefaultOptions() {
+export function getDefaultOptions(): Partial<BeachballOptions> {
   return {
     all: false,
-    branch: 'origin/master',
     command: 'change',
     message: '',
     publish: true,
@@ -28,5 +27,5 @@ export function getDefaultOptions() {
     bump: true,
     canaryName: undefined,
     generateChangelog: true,
-  } as BeachballOptions;
+  };
 }

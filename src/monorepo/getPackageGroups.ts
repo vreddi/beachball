@@ -1,9 +1,13 @@
 import { VersionGroupOptions } from '../types/BeachballOptions';
 import path from 'path';
-import { PackageInfos, PackageGroups } from '../types/PackageInfo';
+import { BeachballPackageInfos, PackageGroups } from '../types/BeachballPackageInfo';
 import { isPathIncluded } from './utils';
 
-export function getPackageGroups(packageInfos: PackageInfos, root: string, groups: VersionGroupOptions[] | undefined) {
+export function getPackageGroups(
+  packageInfos: BeachballPackageInfos,
+  root: string,
+  groups: VersionGroupOptions[] | undefined
+) {
   const packageGroups: PackageGroups = {};
 
   if (groups) {

@@ -1,9 +1,9 @@
-import { PackageInfo } from '../types/PackageInfo';
+import { BeachballPackageInfo } from '../types/BeachballPackageInfo';
 import path from 'path';
 import { npm } from './npm';
 
 export function packagePublish(
-  packageInfo: PackageInfo,
+  packageInfo: BeachballPackageInfo,
   registry: string,
   token: string,
   access: string,

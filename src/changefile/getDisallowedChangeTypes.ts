@@ -1,15 +1,16 @@
 import { ChangeType } from '../types/ChangeInfo';
-import { PackageGroups, PackageInfos } from '../types/PackageInfo';
+import { PackageGroups, BeachballPackageInfo } from '../types/BeachballPackageInfo';
+
 export function getDisallowedChangeTypes(
   packageName: string,
-  packageInfos: PackageInfos,
+  // packageInfo: Pick<BeachballPackageInfo, 'name' | 'combinedOptions'>,
   packageGroups: PackageGroups
 ): ChangeType[] | null {
   for (const groupName of Object.keys(packageGroups)) {
     const groupsInfo = packageGroups[groupName];
-    if (groupsInfo.packageNames.indexOf(packageName) > -1) {
+    if (groupsInfo.packageNames.indexOf(packageInfo.name) > -1) {
       return groupsInfo.disallowedChangeTypes;
     }
   }
-  return packageInfos[packageName].combinedOptions.disallowedChangeTypes;
+  return packageInfo.combinedOptions.disallowedChangeTypes;
 }

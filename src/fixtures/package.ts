@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import * as tmp from 'tmp';
-import { PackageInfo } from '../types/PackageInfo';
+import { BeachballPackageInfo } from '../types/BeachballPackageInfo';
 
 export const testTag = 'testbeachballtag';
 
@@ -15,7 +15,7 @@ var tmpPackageFile = path.join(tmp.dirSync().name, 'package.json');
 
 fs.writeJSONSync(tmpPackageFile, testPackage, { spaces: 2 });
 
-export const testPackageInfo: PackageInfo = {
+export const testPackageInfo: BeachballPackageInfo = {
   name: testPackage.name,
   packageJsonPath: tmpPackageFile,
   version: testPackage.version,

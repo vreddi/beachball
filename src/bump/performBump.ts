@@ -3,7 +3,7 @@ import { writeChangelog } from '../changelog/writeChangelog';
 import fs from 'fs-extra';
 import { BumpInfo } from '../types/BumpInfo';
 import { BeachballOptions } from '../types/BeachballOptions';
-import { PackageDeps, PackageInfos } from '../types/PackageInfo';
+import { PackageInfos, PackageDeps } from 'workspace-tools';
 
 export function writePackageJson(modifiedPackages: Set<string>, packageInfos: PackageInfos) {
   for (const pkgName of modifiedPackages) {

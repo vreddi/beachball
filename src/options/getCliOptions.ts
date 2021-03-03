@@ -58,7 +58,14 @@ function getCliOptionsUncached(argv: string[]): CliOptions {
   }
 
   if (args.branch) {
-    cliOptions.branch = args.branch.indexOf('/') > -1 ? args.branch : getDefaultRemoteBranch(args.branch, cwd);
+    try {
+      cliOptions.branch =
+        args.branch.indexOf('/') > -1 ? args.branch : getDefaultRemoteBranch(args.branch, cwd, true /*strict*/);
+    } catch (err) {
+      console.error('Could not determine which branch to compare against:');
+      console.error(err);
+      process.exit(1);
+    }
   }
 
   return cliOptions;

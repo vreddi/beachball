@@ -1,9 +1,8 @@
 import fs from 'fs-extra';
 import { RepositoryFactory } from '../fixtures/repository';
 import { writeChangeFiles } from '../changefile/writeChangeFiles';
-import { git } from 'workspace-tools';
+import { git, getPackageInfos as getBasicPackageInfos } from 'workspace-tools';
 import { bump } from '../commands/bump';
-import { getPackageInfos } from '../monorepo/getPackageInfos';
 import { BeachballOptions } from '../types/BeachballOptions';
 import { getChangePath } from '../paths';
 import { MonoRepoFactory } from '../fixtures/monorepo';
@@ -96,7 +95,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, bumpDeps: false } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.1.0');
     expect(packageInfos['pkg-2'].version).toBe('1.0.0');
@@ -186,7 +185,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, bumpDeps: false, fromRef: revParseOutput.stdout } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.0.0');
     expect(packageInfos['pkg-2'].version).toBe('1.0.0');
@@ -269,7 +268,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, bumpDeps: true } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.1.0');
     expect(packageInfos['pkg-2'].version).toBe('1.0.1');
@@ -337,7 +336,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, groups: [{ include: 'packages/*', name: 'testgroup' }] } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.1.0');
     expect(packageInfos['pkg-2'].version).toBe('1.1.0');
@@ -428,7 +427,7 @@ describe('version bumping', () => {
       bumpDeps: true,
     } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.1.0');
     expect(packageInfos['pkg-2'].version).toBe('1.1.0');
@@ -463,7 +462,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, bumpDeps: true, scope: ['!packages/foo'] } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
     expect(packageInfos['foo'].version).toBe('1.0.0');
     expect(packageInfos['bar'].version).toBe('1.3.4');
 
@@ -493,7 +492,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, bumpDeps: true, scope: ['!packages/foo'] } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
     expect(packageInfos['foo'].version).toBe('1.0.0');
     expect(packageInfos['bar'].version).toBe('1.3.5');
     expect(packageInfos['foo'].dependencies?.bar).toBe('^1.3.4');
@@ -574,7 +573,7 @@ describe('version bumping', () => {
 
     await bump({ path: repo.rootPath, bumpDeps: false, keepChangeFiles: true } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.1.0');
     expect(packageInfos['pkg-2'].version).toBe('1.0.0');
@@ -665,7 +664,7 @@ describe('version bumping', () => {
       prereleasePrefix: 'beta',
     } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.0.1-beta.0');
     expect(packageInfos['pkg-2'].version).toBe('1.0.1');
@@ -756,7 +755,7 @@ describe('version bumping', () => {
       prereleasePrefix: 'beta',
     } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.0.1-beta.0');
     expect(packageInfos['pkg-2'].version).toBe('1.0.1-beta.0');
@@ -847,7 +846,7 @@ describe('version bumping', () => {
       prereleasePrefix: 'beta',
     } as BeachballOptions);
 
-    const packageInfos = getPackageInfos(repo.rootPath);
+    const packageInfos = getBasicPackageInfos(repo.rootPath);
 
     expect(packageInfos['pkg-1'].version).toBe('1.0.1-beta.1');
     expect(packageInfos['pkg-2'].version).toBe('1.0.1-beta.0');

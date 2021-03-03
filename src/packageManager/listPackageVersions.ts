@@ -1,6 +1,6 @@
 import { npmAsync } from './npm';
 import pLimit from 'p-limit';
-import { PackageInfo } from '../types/PackageInfo';
+import { BeachballPackageInfo } from '../types/BeachballPackageInfo';
 
 const packageVersions: { [pkgName: string]: any } = {};
 
@@ -28,7 +28,7 @@ export async function getNpmPackageInfo(packageName: string, registry: string, t
 }
 
 export async function listPackageVersionsByTag(
-  packageInfos: PackageInfo[],
+  packageInfos: BeachballPackageInfo[],
   registry: string,
   tag: string,
   token?: string | null
