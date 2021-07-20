@@ -6,9 +6,11 @@ import * as os from 'os';
 import { findProjectRoot } from '../paths';
 
 export async function init(options: BeachballOptions) {
-  const root = findProjectRoot(options.path);
+  let root: string;
 
-  if (!root) {
+  try {
+    root = findProjectRoot(options.path);
+  } catch (err) {
     console.log('Please run this command on an existing repository root.');
     return;
   }

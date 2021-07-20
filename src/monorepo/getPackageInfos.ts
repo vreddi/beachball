@@ -1,7 +1,7 @@
-import { findPackageRoot, findProjectRoot } from '../paths';
+import { findProjectRoot } from '../paths';
 import fs from 'fs-extra';
 import path from 'path';
-import { getWorkspaces, listAllTrackedFiles } from 'workspace-tools';
+import { findPackageRoot, getWorkspaces, listAllTrackedFiles } from 'workspace-tools';
 import { PackageInfos } from '../types/PackageInfo';
 import { infoFromPackageJson } from './infoFromPackageJson';
 
