@@ -4,7 +4,7 @@ import path from 'path';
 import { isPathIncluded } from './utils';
 
 export function getScopedPackages(options: BeachballOptions) {
-  const packageInfos = getPackageInfos(options.path);
+  const packageInfos = getPackageInfos(options.path, options);
   if (!options.scope) {
     return Object.keys(packageInfos);
   }

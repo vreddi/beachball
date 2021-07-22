@@ -4,20 +4,21 @@ import path from 'path';
 import { getWorkspaces, listAllTrackedFiles } from 'workspace-tools';
 import { PackageInfos } from '../types/PackageInfo';
 import { infoFromPackageJson } from './infoFromPackageJson';
+import { BeachballOptions } from '../types/BeachballOptions';
 
-export function getPackageInfos(cwd: string) {
+export function getPackageInfos(cwd: string, options?: BeachballOptions) {
   const projectRoot = findProjectRoot(cwd);
   const packageRoot = findPackageRoot(cwd);
 
   return (
-    (projectRoot && getPackageInfosFromWorkspace(projectRoot)) ||
-    (projectRoot && getPackageInfosFromNonWorkspaceMonorepo(projectRoot)) ||
-    (packageRoot && getPackageInfosFromSingleRepo(packageRoot)) ||
+    (projectRoot && getPackageInfosFromWorkspace(projectRoot, options)) ||
+    (projectRoot && getPackageInfosFromNonWorkspaceMonorepo(projectRoot, options)) ||
+    (packageRoot && getPackageInfosFromSingleRepo(packageRoot, options)) ||
     {}
   );
 }
 
-function getPackageInfosFromWorkspace(projectRoot: string) {
+function getPackageInfosFromWorkspace(projectRoot: string, options?: BeachballOptions) {
   try {
     const packageInfos: PackageInfos = {};
 
@@ -30,7 +31,7 @@ function getPackageInfosFromWorkspace(projectRoot: string) {
         const packageJsonPath = path.join(packagePath, 'package.json');
 
         try {
-          packageInfos[packageJson.name] = infoFromPackageJson(packageJson, packageJsonPath);
+          packageInfos[packageJson.name] = infoFromPackageJson(packageJson, packageJsonPath, options);
         } catch (e) {
           // Pass, the package.json is invalid
           console.warn(`Invalid package.json file detected ${packageJsonPath}: `, e);
@@ -44,7 +45,7 @@ function getPackageInfosFromWorkspace(projectRoot: string) {
   }
 }
 
-function getPackageInfosFromNonWorkspaceMonorepo(projectRoot: string) {
+function getPackageInfosFromNonWorkspaceMonorepo(projectRoot: string, options?: BeachballOptions) {
   const packageJsonFiles = listAllTrackedFiles(['**/package.json', 'package.json'], projectRoot);
 
   const packageInfos: PackageInfos = {};
@@ -54,7 +55,7 @@ function getPackageInfosFromNonWorkspaceMonorepo(projectRoot: string) {
       try {
         const packageJsonFullPath = path.join(projectRoot, packageJsonPath);
         const packageJson = fs.readJSONSync(packageJsonFullPath);
-        packageInfos[packageJson.name] = infoFromPackageJson(packageJson, packageJsonFullPath);
+        packageInfos[packageJson.name] = infoFromPackageJson(packageJson, packageJsonFullPath, options);
       } catch (e) {
         // Pass, the package.json is invalid
         console.warn(`Invalid package.json file detected ${packageJsonPath}: `, e);
@@ -65,10 +66,10 @@ function getPackageInfosFromNonWorkspaceMonorepo(projectRoot: string) {
   }
 }
 
-function getPackageInfosFromSingleRepo(packageRoot: string) {
+function getPackageInfosFromSingleRepo(packageRoot: string, options?: BeachballOptions) {
   const packageInfos: PackageInfos = {};
   const packageJsonFullPath = path.resolve(packageRoot, 'package.json');
   const packageJson = fs.readJSONSync(packageJsonFullPath);
-  packageInfos[packageJson.name] = infoFromPackageJson(packageJson, packageJsonFullPath);
+  packageInfos[packageJson.name] = infoFromPackageJson(packageJson, packageJsonFullPath, options);
   return packageInfos;
 }

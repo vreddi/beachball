@@ -1,21 +1,26 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { PackageOptions } from '../types/BeachballOptions';
+import { BeachballOptions, PackageOptions } from '../types/BeachballOptions';
 import { getCliOptions } from './getCliOptions';
 import { getRepoOptions } from './getRepoOptions';
 import { getDefaultOptions } from './getDefaultOptions';
 import path from 'path';
 
 /**
- * Gets all package level options (default + root options + package options + cli options)
- * This function inherits packageOptions from the repoOptions
+ * Gets all package level options (default + root options + package options + cli options).
+ * This function inherits packageOptions from the repoOptions.
+ * @param actualPackageOptions Options for the specific package
+ * @param options Previously read default/repo/CLI options. If not provided, will be read from the filesystem.
  */
-export function getCombinedPackageOptions(actualPackageOptions: Partial<PackageOptions>): PackageOptions {
-  const defaultOptions = getDefaultOptions();
-  const cliOptions = getCliOptions(process.argv);
-  const repoOptions = getRepoOptions(cliOptions);
+export function getCombinedPackageOptions(
+  actualPackageOptions: Partial<PackageOptions>,
+  options?: BeachballOptions
+): PackageOptions {
+  const cliOptions = getCliOptions(options?.argv || process.argv);
   return {
-    ...defaultOptions,
-    ...repoOptions,
+    ...(options || {
+      ...getDefaultOptions(),
+      ...getRepoOptions(cliOptions),
+    }),
     ...actualPackageOptions,
     ...cliOptions,
   };

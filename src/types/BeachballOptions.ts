@@ -3,7 +3,12 @@ import { ChangeType } from './ChangeInfo';
 import { ChangeFilePromptOptions } from './ChangeFilePrompt';
 import { ChangelogOptions } from './ChangelogOptions';
 
-export type BeachballOptions = CliOptions & RepoOptions & PackageOptions;
+export type BeachballOptions = CliOptions &
+  RepoOptions &
+  PackageOptions & {
+    /** Original argv (if not process.argv). Mainly used for tests involving argv. */
+    argv?: string[];
+  };
 
 export interface CliOptions {
   all: boolean;

@@ -38,9 +38,12 @@ export class Registry {
       try {
         await this.startWithPort(tryPort);
         this.port = tryPort;
-      } catch {
+        console.log('Started server on port ' + tryPort);
+      } catch (err) {
+        console.log(`Error starting server on port ${tryPort}: ${err}`);
+        this.stop();
         tryPort++;
-        console.log(`Could not start server, trying again on port ${tryPort}`);
+        console.log(`Retrying on port ${tryPort}`);
       }
     }
   }
@@ -50,7 +53,7 @@ export class Registry {
       this.server = spawn(process.execPath, [verdaccioApi, port.toString()]);
 
       if (!this.server || !this.server.stdout || !this.server.stderr) {
-        return reject();
+        return reject('unknown error spawning process');
       }
 
       this.server.stdout.on('data', data => {
@@ -60,11 +63,11 @@ export class Registry {
       });
 
       this.server.stderr.on('data', data => {
-        reject();
+        reject(data);
       });
 
       this.server.on('error', data => {
-        reject();
+        reject(data);
       });
     });
   }

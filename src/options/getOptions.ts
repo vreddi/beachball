@@ -8,5 +8,5 @@ import { getDefaultOptions } from './getDefaultOptions';
  */
 export function getOptions(argv: string[]): BeachballOptions {
   const cliOptions = getCliOptions(argv);
-  return { ...getDefaultOptions(), ...getRepoOptions(cliOptions), ...cliOptions };
+  return { ...getDefaultOptions(), ...getRepoOptions(cliOptions), ...cliOptions, argv };
 }
