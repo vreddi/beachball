@@ -1,5 +1,5 @@
 import { gatherBumpInfo } from '../bump/gatherBumpInfo';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { gitFailFast, getBranchName, getCurrentHash } from 'workspace-tools';
 import prompts from 'prompts';
 import { getPackageChangeTypes } from '../changefile/getPackageChangeTypes';
@@ -8,8 +8,8 @@ import { bumpAndPush } from '../publish/bumpAndPush';
 import { publishToRegistry } from '../publish/publishToRegistry';
 import { getNewPackages } from '../publish/getNewPackages';
 
-export async function publish(options: BeachballOptions) {
-  const { path: cwd, branch, registry, tag } = options;
+export async function publish(options: BeachballOptions2) {
+  const { path: cwd, branch, registry, tag, bump, publish, push, yes } = options;
   // First, validate that we have changes to publish
   const changes = readChangeFiles(options);
   const packageChangeTypes = getPackageChangeTypes(changes);
@@ -29,12 +29,12 @@ export async function publish(options: BeachballOptions) {
   target branch: ${branch}
   tag: ${tag}
 
-  bumps versions: ${options.bump ? 'yes' : 'no'}
-  publishes to npm registry: ${options.publish ? 'yes' : 'no'}
-  pushes to remote git repo: ${options.bump && options.push && options.branch ? 'yes' : 'no'}
+  bumps versions: ${bump ? 'yes' : 'no'}
+  publishes to npm registry: ${publish ? 'yes' : 'no'}
+  pushes to remote git repo: ${bump && push && branch ? 'yes' : 'no'}
 
 `);
-  if (!options.yes) {
+  if (!yes) {
     const response = await prompts({
       type: 'confirm',
       name: 'yes',
@@ -50,19 +50,20 @@ export async function publish(options: BeachballOptions) {
   console.log(`creating temporary publish branch ${publishBranch}`);
   gitFailFast(['checkout', '-b', publishBranch], { cwd });
 
-  if (options.bump) {
+  if (bump) {
     console.log('Bumping version for npm publish');
   }
 
   const bumpInfo = gatherBumpInfo(options);
+  let newPackages: Set<string> | undefined;
 
   if (options.new) {
-    bumpInfo.newPackages = new Set<string>(await getNewPackages(bumpInfo, options.registry));
+    newPackages = new Set<string>(await getNewPackages(bumpInfo, registry));
   }
 
   // Step 1. Bump + npm publish
   // npm / yarn publish
-  if (options.publish) {
+  if (publish) {
     await publishToRegistry(bumpInfo, options);
   } else {
     console.log('Skipping publish');
@@ -70,7 +71,7 @@ export async function publish(options: BeachballOptions) {
 
   // Step 2.
   // - reset, fetch latest from origin/master (to ensure less chance of conflict), then bump again + commit
-  if (options.bump && branch && options.push) {
+  if (bump && branch && push) {
     await bumpAndPush(bumpInfo, publishBranch, options);
   } else {
     console.log('Skipping git push and tagging');

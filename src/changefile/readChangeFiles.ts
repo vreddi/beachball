@@ -2,16 +2,15 @@ import { ChangeSet, ChangeInfo } from '../types/ChangeInfo';
 import { getChangePath } from '../paths';
 import fs from 'fs-extra';
 import path from 'path';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { getScopedPackages } from '../monorepo/getScopedPackages';
 import { getFileAddedHash, getChangesBetweenRefs } from 'workspace-tools';
 
-export function readChangeFiles(options: BeachballOptions): ChangeSet {
-  const { path: cwd } = options;
+export function readChangeFiles(options: BeachballOptions2): ChangeSet {
+  const { path: cwd, fromRef } = options;
   const scopedPackages = getScopedPackages(options);
   const changeSet: ChangeSet = new Map();
   const changePath = getChangePath(cwd);
-  const fromRef = options.fromRef;
 
   if (!changePath || !fs.existsSync(changePath)) {
     return changeSet;
@@ -60,7 +59,7 @@ export function readChangeFiles(options: BeachballOptions): ChangeSet {
       };
 
       const packageName = changeInfo.packageName;
-      if (scopedPackages.includes(packageName)) {
+      if (scopedPackages.has(packageName)) {
         changeSet.set(changeFile, changeInfo);
       } else {
         console.log(`Skipping reading change file for out-of-scope package ${packageName}`);

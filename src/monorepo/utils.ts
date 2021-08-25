@@ -3,7 +3,11 @@ import minimatch from 'minimatch';
 /**
  * Check if a relative path should be included given include and exclude patterns using minimatch.
  */
-export function isPathIncluded(relativePath: string, include: string | string[], exclude?: string | string[]) {
+export function isPathIncluded(
+  relativePath: string,
+  include: string | ReadonlyArray<string>,
+  exclude?: string | ReadonlyArray<string>
+) {
   const includePatterns = typeof include === 'string' ? [include] : include;
   let shouldInclude = includePatterns.reduce(
     (included, pattern) => included || minimatch(relativePath, pattern),

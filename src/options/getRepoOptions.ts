@@ -1,7 +1,11 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { RepoOptions, CliOptions } from '../types/BeachballOptions';
+import { getDefaultRemoteBranch } from 'workspace-tools';
+import { RepoOptions, CliOptions, InferredOptions } from '../types/BeachballOptions';
+import { Immutable } from '../types/Immutable';
 
-export function getRootOptions(cliOptions: CliOptions): RepoOptions {
+/** @internal */
+export function getRepoOptions(cliOptions: Immutable<CliOptions>): RepoOptions & Required<Pick<RepoOptions, 'branch'>> {
+  let config: RepoOptions;
   if (cliOptions.configPath) {
     const repoOptions = tryLoadConfig(cliOptions.configPath);
     if (!repoOptions) {
@@ -9,10 +13,16 @@ export function getRootOptions(cliOptions: CliOptions): RepoOptions {
       process.exit(1);
     }
 
-    return repoOptions;
+    config = repoOptions;
+  } else {
+    config = trySearchConfig() || {};
   }
 
-  return trySearchConfig() || {};
+  if (!config.branch && !cliOptions.branch) {
+    config.branch = getDefaultRemoteBranch('master', cliOptions.path, true /*strict*/);
+  }
+
+  return config as ReturnType<typeof getRepoOptions>;
 }
 
 function tryLoadConfig(configPath: string): RepoOptions {

@@ -4,30 +4,29 @@ import { getRecentCommitMessages, getUserEmail } from 'workspace-tools';
 import prompts from 'prompts';
 import { getPackageInfos } from '../monorepo/getPackageInfos';
 import { prerelease } from 'semver';
-import { BeachballOptions } from '../types/BeachballOptions';
 import { getPackageGroups } from '../monorepo/getPackageGroups';
 import { isValidChangeType } from '../validation/isValidChangeType';
 import { DefaultPrompt } from '../types/ChangeFilePrompt';
 import { getDisallowedChangeTypes } from './getDisallowedChangeTypes';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 
 /**
  * Uses `prompts` package to prompt for change type and description, fills in git user.email and scope
  */
-export async function promptForChange(options: BeachballOptions) {
-  const { branch, path: cwd, package: specificPackage } = options;
+export async function promptForChange(options: BeachballOptions2) {
+  const { branch, path: cwd, package: specificPackage, type, message, dependentChangeType } = options;
 
   const changedPackages = specificPackage ? [specificPackage] : getChangedPackages(options);
   const recentMessages = getRecentCommitMessages(branch, cwd) || [];
   const packageChangeInfo: { [pkgname: string]: ChangeFileInfo } = {};
 
-  const packageInfos = getPackageInfos(cwd);
-  const packageGroups = getPackageGroups(packageInfos, options.path, options.groups);
+  const packageInfos = options.getBasicPackageInfos();
 
   for (let pkg of changedPackages) {
     console.log('');
     console.log(`Please describe the changes for: ${pkg}`);
 
-    const disallowedChangeTypes = getDisallowedChangeTypes(pkg, packageInfos, packageGroups);
+    const disallowedChangeTypes = getDisallowedChangeTypes(pkg, options);
     const packageInfo = packageInfos[pkg];
     const showPrereleaseOption = prerelease(packageInfo.version);
     const changeTypePrompt: prompts.PromptObject<string> = {
@@ -51,8 +50,8 @@ export async function promptForChange(options: BeachballOptions) {
       return;
     }
 
-    if (options.type && disallowedChangeTypes?.includes(options.type as ChangeType)) {
-      console.log(`${options.type} type is not allowed, aborting`);
+    if (type && disallowedChangeTypes?.includes(type)) {
+      console.log(`${type} type is not allowed, aborting`);
       return;
     }
 
@@ -65,28 +64,24 @@ export async function promptForChange(options: BeachballOptions) {
       },
     };
 
-    const showChangeTypePrompt = !options.type && changeTypePrompt.choices!.length > 1;
+    const showChangeTypePrompt = !type && changeTypePrompt.choices!.length > 1;
 
     const defaultPrompt: DefaultPrompt = {
       changeType: showChangeTypePrompt ? changeTypePrompt : undefined,
-      description: !options.message ? descriptionPrompt : undefined,
+      description: !message ? descriptionPrompt : undefined,
     };
 
-    let questions = [defaultPrompt.changeType, defaultPrompt.description];
-
-    if (packageInfo.combinedOptions.changeFilePrompt?.changePrompt) {
-      questions = packageInfo.combinedOptions.changeFilePrompt?.changePrompt(defaultPrompt);
-    }
-
-    questions = questions.filter(q => !!q);
+    const changePrompt = options.resolve('changeFilePrompt', pkg)?.changePrompt;
+    const defaultQuestions = [defaultPrompt.changeType, defaultPrompt.description];
+    const questions = (changePrompt?.(defaultPrompt) || defaultQuestions).filter((q): q is prompts.PromptObject => !!q);
 
     let response: { comment: string; type: ChangeType } = {
-      type: options.type || 'none',
-      comment: options.message || '',
+      type: type || 'none',
+      comment: message || '',
     };
 
     if (questions.length > 0) {
-      response = (await prompts(questions as prompts.PromptObject[])) as { comment: string; type: ChangeType };
+      response = (await prompts(questions)) as { comment: string; type: ChangeType };
 
       if (Object.keys(response).length === 0) {
         console.log('Cancelled, no change files are written');
@@ -101,16 +96,16 @@ export async function promptForChange(options: BeachballOptions) {
       //    but we didn't display it due to showChangeTypePrompt === false;
       //    so set the type to 'none'
       if (!response.type) {
-        if (!options.type) {
+        if (!type) {
           console.log("WARN: change type 'none' assumed by default");
           console.log('(Not what you intended? Check the repo-level and package-level beachball configs.)');
         }
-        response = { ...response, type: options.type || 'none' };
+        response = { ...response, type: type || 'none' };
       }
 
       // fallback to the options.message if message is absent in the user input
-      if (!response.comment && options.message) {
-        response = { ...response, comment: options.message };
+      if (!response.comment && message) {
+        response = { ...response, comment: message };
       }
 
       if (!isValidChangeType(response.type)) {
@@ -123,7 +118,7 @@ export async function promptForChange(options: BeachballOptions) {
       ...response,
       packageName: pkg,
       email: getUserEmail(cwd) || 'email not defined',
-      dependentChangeType: options.dependentChangeType || (response.type === 'none' ? 'none' : 'patch'),
+      dependentChangeType: dependentChangeType || (response.type === 'none' ? 'none' : 'patch'),
     };
   }
 

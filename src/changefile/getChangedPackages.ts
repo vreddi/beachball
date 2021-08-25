@@ -4,12 +4,12 @@ import { getChanges, getStagedChanges, git, fetchRemoteBranch, parseRemoteBranch
 import fs from 'fs-extra';
 import path from 'path';
 import { getScopedPackages } from '../monorepo/getScopedPackages';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 
 /**
  * Gets all the changed packages, regardless of the change files
  */
-function getAllChangedPackages(options: BeachballOptions) {
+function getAllChangedPackages(options: BeachballOptions2): string[] {
   const { branch, path: cwd } = options;
 
   const changes = [...(getChanges(branch, cwd) || []), ...(getStagedChanges(cwd) || [])];
@@ -27,10 +27,10 @@ function getAllChangedPackages(options: BeachballOptions) {
           try {
             const packageJson = fs.readJSONSync(path.join(root, 'package.json'));
 
-            if (!packageJson.private && (!packageJson.beachball || packageJson.beachball.shouldPublish !== false)) {
+            if (!packageJson.private && packageJson.beachball?.shouldPublish !== false) {
               const packageName = packageJson.name;
 
-              if (scopedPackages.includes(packageName)) {
+              if (scopedPackages.has(packageName)) {
                 packageRoots[root] = packageName;
               }
             }
@@ -47,7 +47,7 @@ function getAllChangedPackages(options: BeachballOptions) {
 /**
  * Gets all the changed packages, accounting for change files
  */
-export function getChangedPackages(options: BeachballOptions) {
+export function getChangedPackages(options: BeachballOptions2): string[] {
   const { fetch, path: cwd, branch } = options;
 
   const changePath = getChangePath(cwd);

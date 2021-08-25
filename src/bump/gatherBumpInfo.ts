@@ -1,40 +1,44 @@
 import { getPackageChangeTypes } from '../changefile/getPackageChangeTypes';
 import { readChangeFiles } from '../changefile/readChangeFiles';
-import { getPackageInfos } from '../monorepo/getPackageInfos';
-import { ChangeInfo, ChangeSet } from '../types/ChangeInfo';
+import { ChangeSet } from '../types/ChangeInfo';
 import { BumpInfo } from '../types/BumpInfo';
 import { bumpInPlace } from './bumpInPlace';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { getScopedPackages } from '../monorepo/getScopedPackages';
 import { getChangePath } from '../paths';
 import path from 'path';
+import { getDependents } from './getDependents';
+import { getPackageGroups } from '../monorepo/getPackageGroups';
 
-function gatherPreBumpInfo(options: BeachballOptions): BumpInfo {
+function gatherPreBumpInfo(options: BeachballOptions2): BumpInfo {
   const { path: cwd } = options;
   // Collate the changes per package
-  const packageInfos = getPackageInfos(cwd);
+  const packageInfos = options.getBasicPackageInfos(true /*copy*/);
   const changes = readChangeFiles(options);
   const changePath = getChangePath(cwd);
+  if (!changePath) {
+    throw new Error(`Could not find "change" folder relative to `);
+  }
 
   const dependentChangeTypes: BumpInfo['dependentChangeTypes'] = {};
-  const groupOptions = {};
 
   // Clear changes for non-existent and accidental private packages
   // NOTE: likely these are from the same PR that deleted or modified the private flag
   const filteredChanges: ChangeSet = new Map();
   for (let [changeFile, change] of changes) {
-    if (!packageInfos[change.packageName] || packageInfos[change.packageName].private) {
+    const changeFilePath = path.resolve(changePath!, changeFile);
+    if (!packageInfos[change.packageName]) {
       console.warn(
-        `Invalid change file detected (non-existent package or private package); delete this file "${path.resolve(
-          changePath!,
-          changeFile
-        )}"`
+        `Invalid change file found: "${change.packageName}" does not exist (delete this file). "${changeFilePath}"`
       );
-      continue;
+    } else if (packageInfos[change.packageName].private) {
+      console.warn(
+        `Invalid change file found: "${change.packageName}" is private (delete this file). "${changeFilePath}"`
+      );
+    } else {
+      filteredChanges.set(changeFile, change);
+      dependentChangeTypes[change.packageName] = change.dependentChangeType || 'patch';
     }
-
-    filteredChanges.set(changeFile, change);
-    dependentChangeTypes[change.packageName] = change.dependentChangeType || 'patch';
   }
 
   // Clear non-existent changeTypes
@@ -45,22 +49,21 @@ function gatherPreBumpInfo(options: BeachballOptions): BumpInfo {
     }
   });
 
+  const scopedPackages = getScopedPackages(options);
+  const dependents = options.bumpDeps ? getDependents(packageInfos, scopedPackages) : {};
+
   return {
     packageChangeTypes,
-    packageInfos,
-    packageGroups: {},
+    updatedPackageInfos: packageInfos,
     changes: filteredChanges,
-    modifiedPackages: new Set<string>(),
-    newPackages: new Set<string>(),
-    scopedPackages: new Set(getScopedPackages(options)),
+    scopedPackages,
     dependentChangeTypes,
-    groupOptions,
-    dependents: {},
-    dependentChangeInfos: new Array<ChangeInfo>(),
+    dependents,
+    // dependentChangeInfos: [],
   };
 }
 
-export function gatherBumpInfo(options: BeachballOptions): BumpInfo {
+export function gatherBumpInfo(options: BeachballOptions2): BumpInfo {
   const bumpInfo = gatherPreBumpInfo(options);
   bumpInPlace(bumpInfo, options);
   return bumpInfo;

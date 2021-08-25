@@ -2,20 +2,15 @@ import { ChangeSet } from '../types/ChangeInfo';
 import { getChangePath } from '../paths';
 import fs from 'fs-extra';
 import path from 'path';
-import { PackageInfo } from '../types/PackageInfo';
+import { PackageInfos } from 'workspace-tools';
+import { Immutable } from '../types/Immutable';
 
 /**
  * Unlink only change files that are specified in the changes param
  *
  * @param changes existing change files to be removed
  */
-export function unlinkChangeFiles(
-  changeSet: ChangeSet,
-  packageInfos: {
-    [pkg: string]: PackageInfo;
-  },
-  cwd: string
-) {
+export function unlinkChangeFiles(changeSet: Immutable<ChangeSet>, packageInfos: Immutable<PackageInfos>, cwd: string) {
   const changePath = getChangePath(cwd);
   if (!changePath || !changeSet || changeSet.size === 0) {
     return;

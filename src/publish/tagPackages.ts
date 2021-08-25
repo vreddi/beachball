@@ -1,12 +1,13 @@
 import { BumpInfo } from '../types/BumpInfo';
 import { generateTag } from '../tag';
 import { gitFailFast } from 'workspace-tools';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 
 function createTag(tag: string, cwd: string) {
   gitFailFast(['tag', '-a', '-f', tag, '-m', tag], { cwd });
 }
 
-export function tagPackages(bumpInfo: BumpInfo, cwd: string) {
+export function tagPackages(bumpInfo: BumpInfo, options: BeachballOptions2, cwd: string) {
   const { modifiedPackages, newPackages } = bumpInfo;
 
   [...modifiedPackages, ...newPackages].forEach(pkg => {

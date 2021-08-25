@@ -1,14 +1,13 @@
 import { ChangeInfo, ChangeSet } from '../types/ChangeInfo';
-import { PackageInfo } from '../types/PackageInfo';
+import { PackageVersionInfos } from '../types/BumpInfo';
 import { PackageChangelog } from '../types/ChangeLog';
 import { generateTag } from '../tag';
+import { Immutable } from '../types/Immutable';
 
 export function getPackageChangelogs(
-  changeSet: ChangeSet,
-  dependentChangeInfos: Array<ChangeInfo>,
-  packageInfos: {
-    [pkg: string]: PackageInfo;
-  }
+  changeSet: Immutable<ChangeSet>,
+  dependentChangeInfos: Immutable<ChangeInfo[]>,
+  updatedPackageInfos: Immutable<PackageVersionInfos>
 ) {
   const changeInfos = Array.from(changeSet.values()).concat(dependentChangeInfos);
   const changelogs: {
@@ -17,7 +16,7 @@ export function getPackageChangelogs(
   for (let change of changeInfos) {
     const { packageName } = change;
     if (!changelogs[packageName]) {
-      const version = packageInfos[packageName].version;
+      const version = updatedPackageInfos[packageName].version;
       changelogs[packageName] = {
         name: packageName,
         version,
@@ -36,5 +35,5 @@ export function getPackageChangelogs(
       package: packageName,
     });
   }
-  return changelogs;
+  return changelogs as Immutable<typeof changelogs>;
 }

@@ -4,7 +4,7 @@ import { isValidPackageName } from './isValidPackageName';
 import { isValidChangeType } from './isValidChangeType';
 import { isChangeFileNeeded } from './isChangeFileNeeded';
 import { isValidGroupOptions } from './isValidGroupOptions';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { isValidChangelogOptions } from './isValidChangelogOptions';
 import { readChangeFiles } from '../changefile/readChangeFiles';
 import { getPackageInfos } from '../monorepo/getPackageInfos';
@@ -21,7 +21,7 @@ const defaultValidationOptions: ValidationOptions = {
   allowFetching: true,
 };
 
-export function validate(options: BeachballOptions, validateOptionsOverride?: PartialValidateOptions) {
+export function validate(options: BeachballOptions2, validateOptionsOverride?: PartialValidateOptions) {
   const validateOptions: ValidationOptions = Object.assign({}, defaultValidationOptions, validateOptionsOverride || {});
 
   // Validation Steps
@@ -87,7 +87,7 @@ export function validate(options: BeachballOptions, validateOptionsOverride?: Pa
   const packageGroups = getPackageGroups(packageInfos, options.path, options.groups);
 
   for (const [changeFile, change] of changeSet) {
-    const disallowedChangeTypes = getDisallowedChangeTypes(change.packageName, packageInfos, packageGroups);
+    const disallowedChangeTypes = getDisallowedChangeTypes(packageInfos[change.packageName], packageGroups);
 
     if (!change.type || !isValidChangeType(change.type) || disallowedChangeTypes?.includes(change.type)) {
       console.error(

@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { RepositoryFactory } from '../fixtures/repository';
 import { writeChangelog } from '../changelog/writeChangelog';
 
-import { getPackageInfos } from '../monorepo/getPackageInfos';
+import { getPackageInfos as getBasicPackageInfos } from 'workspace-tools';
 
 import { writeChangeFiles } from '../changefile/writeChangeFiles';
 import { readChangeFiles } from '../changefile/readChangeFiles';
@@ -108,9 +108,9 @@ describe('changelog generation', () => {
       const changes = readChangeFiles(beachballOptions);
 
       // Gather all package info from package.json
-      const packageInfos = getPackageInfos(repository.rootPath);
+      const packageInfos = getBasicPackageInfos(repository.rootPath);
 
-      const dependentChangeInfos = new Array<ChangeInfo>();
+      const dependentChangeInfos: ChangeInfo[] = [];
       dependentChangeInfos.push({ ...getChange({ comment: 'additional comment 1' }), commit: '' });
       dependentChangeInfos.push({ ...getChange({ comment: 'additional comment 2' }), commit: '' });
 
@@ -152,7 +152,7 @@ describe('changelog generation', () => {
       const changes = readChangeFiles(beachballOptions);
 
       // Gather all package info from package.json
-      const packageInfos = getPackageInfos(monoRepo.rootPath);
+      const packageInfos = getBasicPackageInfos(monoRepo.rootPath);
 
       await writeChangelog(beachballOptions, changes, new Array<ChangeInfo>(), packageInfos);
 
@@ -196,7 +196,7 @@ describe('changelog generation', () => {
       const changes = readChangeFiles(beachballOptions);
 
       // Gather all package info from package.json
-      const packageInfos = getPackageInfos(monoRepo.rootPath);
+      const packageInfos = getBasicPackageInfos(monoRepo.rootPath);
 
       await writeChangelog(beachballOptions, changes, new Array<ChangeInfo>(), packageInfos);
 

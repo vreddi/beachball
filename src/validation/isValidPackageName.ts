@@ -1,6 +1,6 @@
-import { getAllPackages } from '../monorepo/getAllPackages';
+import { getPackageInfos as getBasicPackageInfos } from 'workspace-tools';
 
 export function isValidPackageName(pkg: string, cwd: string) {
-  const packages = getAllPackages(cwd);
-  return packages.includes(pkg);
+  const allPackages = getBasicPackageInfos(cwd);
+  return !!allPackages[pkg];
 }

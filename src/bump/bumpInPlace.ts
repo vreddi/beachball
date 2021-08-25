@@ -1,31 +1,24 @@
 import { BumpInfo } from '../types/BumpInfo';
-import { setDependentsInBumpInfo } from './setDependentsInBumpInfo';
 import { updateRelatedChangeType } from './updateRelatedChangeType';
 import { bumpPackageInfoVersion } from './bumpPackageInfoVersion';
-import { BeachballOptions } from '../types/BeachballOptions';
-import { setGroupsInBumpInfo } from './setGroupsInBumpInfo';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { setDependentVersions } from './setDependentVersions';
 import { ChangeInfo } from '../types/ChangeInfo';
 
 /**
  * Updates BumpInfo according to change types, bump deps, and version groups
  *
- * NOTE: THIS FUNCTION MUTATES STATE!
+ * NOTE: THIS FUNCTION MUTATES STATE (bumpInfo)! It does not modify the filesystem.
  */
-export function bumpInPlace(bumpInfo: BumpInfo, options: BeachballOptions) {
+export function bumpInPlace(bumpInfo: BumpInfo, options: BeachballOptions2) {
   const { bumpDeps } = options;
-  const { packageInfos, scopedPackages, packageChangeTypes, modifiedPackages } = bumpInfo;
-  const changes = { ...packageChangeTypes };
+  const { scopedPackages, packageChangeTypes, modifiedPackages } = bumpInfo;
+  const packageInfos = options.getBasicPackageInfos();
+
   // pass 1: figure out all the change types for all the packages taking into account the bumpDeps option and version groups
-  if (bumpDeps) {
-    setDependentsInBumpInfo(bumpInfo);
-  }
-
-  setGroupsInBumpInfo(bumpInfo, options);
-
   const dependentChangeInfos = new Map<string, Map<string, ChangeInfo>>();
-  Object.keys(changes).forEach(pkgName => {
-    updateRelatedChangeType(pkgName, changes[pkgName], bumpInfo, dependentChangeInfos, bumpDeps);
+  Object.keys(packageChangeTypes).forEach(pkgName => {
+    updateRelatedChangeType(pkgName, packageChangeTypes[pkgName], bumpInfo, dependentChangeInfos, bumpDeps, options);
   });
 
   // pass 2: actually bump the packages in the bumpInfo in memory (no disk writes at this point)

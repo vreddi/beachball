@@ -3,7 +3,7 @@ import { ChangeInfo, ChangeSet, ChangeType } from '../types/ChangeInfo';
 /**
  * List of all change types from least to most significant.
  */
-export const SortedChangeTypes: ChangeType[] = ['none', 'prerelease', 'patch', 'minor', 'major'];
+export const SortedChangeTypes: ReadonlyArray<ChangeType> = ['none', 'prerelease', 'patch', 'minor', 'major'];
 
 /**
  * Change type with the smallest weight.
@@ -41,7 +41,10 @@ export function isChangeTypeGreater(a: ChangeType, b: ChangeType) {
   }
 }
 
-export function getAllowedChangeType(changeType: ChangeType, disallowedChangeTypes: ChangeType[] | null): ChangeType {
+export function getAllowedChangeType(
+  changeType: ChangeType,
+  disallowedChangeTypes: ReadonlyArray<ChangeType> | undefined
+): ChangeType {
   if (!changeType) {
     return 'none';
   }
@@ -62,7 +65,7 @@ export function updateChangeInfoWithMaxType(
   changeInfo: ChangeInfo,
   inputA: ChangeType,
   inputB: ChangeType,
-  disallowedChangeTypes: ChangeType[] | null
+  disallowedChangeTypes: ReadonlyArray<ChangeType> | undefined
 ): ChangeInfo {
   return {
     ...changeInfo,
@@ -70,7 +73,11 @@ export function updateChangeInfoWithMaxType(
   };
 }
 
-export function getMaxChangeType(inputA: ChangeType, inputB: ChangeType, disallowedChangeTypes: ChangeType[] | null) {
+export function getMaxChangeType(
+  inputA: ChangeType,
+  inputB: ChangeType,
+  disallowedChangeTypes: ReadonlyArray<ChangeType> | undefined
+) {
   const a = getAllowedChangeType(inputA, disallowedChangeTypes);
   const b = getAllowedChangeType(inputB, disallowedChangeTypes);
 

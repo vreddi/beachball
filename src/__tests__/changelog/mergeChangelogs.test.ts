@@ -1,6 +1,5 @@
 import { PackageChangelog } from '../../types/ChangeLog';
 import { mergeChangelogs } from '../../changelog/mergeChangelogs';
-import { PackageInfo } from '../../types/PackageInfo';
 
 describe('mergeChangelogs', () => {
   const mockDate = new Date('Thu Aug 22 2019 14:20:40 GMT-0700 (Pacific Daylight Time)');
@@ -44,7 +43,7 @@ describe('mergeChangelogs', () => {
       },
     ];
 
-    const mergedChangelog = mergeChangelogs(changelogs, { name: 'master', version: '1.2.3' } as PackageInfo);
+    const mergedChangelog = mergeChangelogs(changelogs, { name: 'master', version: '1.2.3' });
     expect(mergedChangelog).toBeDefined();
     expect(mergedChangelog!.name).toBe('master');
     expect(mergedChangelog!.version).toBe('1.2.3');
@@ -72,7 +71,7 @@ describe('mergeChangelogs', () => {
       },
     ];
 
-    const mergedChangelog = mergeChangelogs(changelogs, { name: 'master', version: '1.2.3' } as PackageInfo);
+    const mergedChangelog = mergeChangelogs(changelogs, { name: 'master', version: '1.2.3' });
     expect(mergedChangelog).toBeDefined();
     expect(mergedChangelog!.name).toBe('master');
     expect(mergedChangelog!.version).toBe('1.2.3');

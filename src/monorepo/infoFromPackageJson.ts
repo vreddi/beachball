@@ -1,8 +1,8 @@
 import path from 'path';
-import { PackageInfo, PackageJson } from '../types/PackageInfo';
-import { getPackageOptions, getCombinedPackageOptions } from '../options/getPackageOptions';
+import { BeachballPackageInfo, PackageJson } from '../types/BeachballPackageInfo';
+import { getPackageOptions } from '../options/getPackageOptions';
 
-export function infoFromPackageJson(packageJson: PackageJson, packageJsonPath: string): PackageInfo {
+export function infoFromPackageJson(packageJson: PackageJson, packageJsonPath: string): BeachballPackageInfo {
   const packageOptions = getPackageOptions(path.dirname(packageJsonPath));
   return {
     name: packageJson.name!,
@@ -12,7 +12,6 @@ export function infoFromPackageJson(packageJson: PackageJson, packageJsonPath: s
     devDependencies: packageJson.devDependencies,
     peerDependencies: packageJson.peerDependencies,
     private: packageJson.private !== undefined ? packageJson.private : false,
-    combinedOptions: getCombinedPackageOptions(packageOptions),
     packageOptions,
   };
 }

@@ -1,23 +1,22 @@
 import parser from 'yargs-parser';
 import { CliOptions } from '../types/BeachballOptions';
-import { findProjectRoot } from '../paths';
 import { getDefaultRemoteBranch } from 'workspace-tools';
 
 let cachedCliOptions: CliOptions;
 
-export function getCliOptions(argv: string[]): CliOptions {
+export function getCliOptions(argv: string[], root: string): CliOptions {
   // Special case caching to process.argv which should be immutable
   if (argv === process.argv) {
     if (!cachedCliOptions) {
-      cachedCliOptions = getCliOptionsUncached(process.argv);
+      cachedCliOptions = getCliOptionsUncached(process.argv, root);
     }
     return cachedCliOptions;
   } else {
-    return getCliOptionsUncached(argv);
+    return getCliOptionsUncached(argv, root);
   }
 }
 
-function getCliOptionsUncached(argv: string[]): CliOptions {
+function getCliOptionsUncached(argv: string[], root: string): CliOptions {
   // Be careful not to mutate the input argv
   const trimmedArgv = [...argv].splice(2);
 
@@ -40,17 +39,16 @@ function getCliOptionsUncached(argv: string[]): CliOptions {
   });
 
   const { _, ...restArgs } = args;
-  const cwd = findProjectRoot(process.cwd()) || process.cwd();
-  const cliOptions = {
+  const cliOptions: CliOptions = {
+    command: 'change',
     ...(_.length > 0 && { command: _[0] }),
     ...(restArgs as any),
-    path: cwd,
     fromRef: args.since,
     keepChangeFiles: args['keep-change-files'],
     disallowDeletedChangeFiles: args['disallow-deleted-change-files'],
     forceVersions: args.force,
     configPath: args.config,
-  } as CliOptions;
+  };
 
   const disallowedChangeTypesArgs = args['disallowed-change-types'];
   if (disallowedChangeTypesArgs) {
@@ -58,7 +56,14 @@ function getCliOptionsUncached(argv: string[]): CliOptions {
   }
 
   if (args.branch) {
-    cliOptions.branch = args.branch.indexOf('/') > -1 ? args.branch : getDefaultRemoteBranch(args.branch, cwd);
+    try {
+      cliOptions.branch =
+        args.branch.indexOf('/') > -1 ? args.branch : getDefaultRemoteBranch(args.branch, root, true /*strict*/);
+    } catch (err) {
+      console.error('Could not determine which branch to compare against:');
+      console.error(err);
+      process.exit(1);
+    }
   }
 
   return cliOptions;

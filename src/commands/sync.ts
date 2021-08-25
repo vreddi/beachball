@@ -1,13 +1,12 @@
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { getScopedPackages } from '../monorepo/getScopedPackages';
-import { getPackageInfos } from '../monorepo/getPackageInfos';
 import { listPackageVersionsByTag } from '../packageManager/listPackageVersions';
 import semver from 'semver';
 import { setDependentVersions } from '../bump/setDependentVersions';
 import { writePackageJson } from '../bump/performBump';
 
-export async function sync(options: BeachballOptions) {
-  const packageInfos = getPackageInfos(options.path);
+export async function sync(options: BeachballOptions2) {
+  const packageInfos = options.getBasicPackageInfos(true /*copy*/);
   const scopedPackages = new Set(getScopedPackages(options));
 
   const infos = new Map(Object.entries(packageInfos).filter(([pkg, info]) => !info.private && scopedPackages.has(pkg)));

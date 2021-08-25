@@ -1,25 +1,27 @@
 import { BumpInfo } from '../types/BumpInfo';
-import { PackageDeps } from '../types/PackageInfo';
+import { Mutable } from '../types/Immutable';
 
 /**
  * Gets dependents for all packages
  *
  * Example: "BigApp" deps on "SomeUtil", "BigApp" would be the dependent
  */
-export function setDependentsInBumpInfo(bumpInfo: BumpInfo): void {
-  const { packageInfos, scopedPackages } = bumpInfo;
-  const packages = Object.keys(packageInfos);
-  const dependents: BumpInfo['dependents'] = {};
+export function getDependents(
+  updatedPackageInfos: BumpInfo['updatedPackageInfos'],
+  scopedPackages: BumpInfo['scopedPackages']
+): BumpInfo['dependents'] {
+  const packages = Object.keys(updatedPackageInfos);
+  const dependents: Mutable<BumpInfo['dependents']> = {};
 
   packages.forEach(pkgName => {
     if (!scopedPackages.has(pkgName)) {
       return;
     }
 
-    const info = packageInfos[pkgName];
-    const depTypes = ['dependencies', 'devDependencies', 'peerDependencies'];
+    const info = updatedPackageInfos[pkgName];
+    const depTypes = ['dependencies', 'devDependencies', 'peerDependencies'] as const;
     depTypes.forEach(depType => {
-      const deps: PackageDeps | undefined = (info as any)[depType];
+      const deps = info[depType];
       if (deps) {
         for (let dep of Object.keys(deps)) {
           if (packages.includes(dep)) {
@@ -33,5 +35,5 @@ export function setDependentsInBumpInfo(bumpInfo: BumpInfo): void {
     });
   });
 
-  bumpInfo.dependents = dependents;
+  return dependents;
 }

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import path from 'path';
 import { performBump } from '../bump/performBump';
 import { BumpInfo } from '../types/BumpInfo';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 import { packagePublish } from '../packageManager/packagePublish';
 import { validatePackageVersions } from './validatePackageVersions';
 import { displayManualRecovery } from './displayManualRecovery';
@@ -10,12 +10,15 @@ import { toposortPackages } from './toposortPackages';
 import { shouldPublishPackage } from './shouldPublishPackage';
 import { validatePackageDependencies } from './validatePackageDependencies';
 
-export async function publishToRegistry(originalBumpInfo: BumpInfo, options: BeachballOptions) {
-  const { registry, token, access, timeout } = options;
+export async function publishToRegistry(originalBumpInfo: BumpInfo, options: BeachballOptions2) {
+  const { registry, token, access, timeout, bump, hooks } = options;
+  const packageInfos = options.getBasicPackageInfos();
+  // TODO: is this needed?
   const bumpInfo = _.cloneDeep(originalBumpInfo);
-  const { modifiedPackages, newPackages, packageInfos } = bumpInfo;
+  const { modifiedPackages, newPackages } = bumpInfo;
 
-  if (options.bump) {
+  if (bump) {
+    // TODO: don't redo this if caller already did it!!
     await performBump(bumpInfo, options);
   }
 
@@ -35,19 +38,21 @@ export async function publishToRegistry(originalBumpInfo: BumpInfo, options: Bea
   }
 
   // get the packages to publish, reducing the set by packages that don't need publishing
-  const packagesToPublish = toposortPackages([...modifiedPackages, ...newPackages], packageInfos).filter(pkg => {
-    const { publish, reasonToSkip } = shouldPublishPackage(bumpInfo, pkg);
-    if (!publish) {
-      console.log(`Skipping publish - ${reasonToSkip}`);
+  const packagesToPublish = toposortPackages([...modifiedPackages, ...(newPackages || [])], packageInfos).filter(
+    pkg => {
+      const { publish, reasonToSkip } = shouldPublishPackage(bumpInfo, pkg);
+      if (!publish) {
+        console.log(`Skipping publish - ${reasonToSkip}`);
+      }
+      return publish;
     }
-    return publish;
-  });
+  );
 
   // if there is a prepublish hook perform a prepublish pass, calling the routine on each package
-  const prepublishHook = options.hooks?.prepublish;
+  const prepublishHook = hooks?.prepublish;
   if (prepublishHook) {
     for (const pkg of packagesToPublish) {
-      const packageInfo = bumpInfo.packageInfos[pkg];
+      const packageInfo = packageInfos[pkg];
       const maybeAwait = prepublishHook(
         path.dirname(packageInfo.packageJsonPath),
         packageInfo.name,
@@ -61,7 +66,7 @@ export async function publishToRegistry(originalBumpInfo: BumpInfo, options: Bea
 
   // finally pass through doing the actual npm publish command
   for (const pkg of packagesToPublish) {
-    const packageInfo = bumpInfo.packageInfos[pkg];
+    const packageInfo = packageInfos[pkg];
     console.log(`Publishing - ${packageInfo.name}@${packageInfo.version} with tag ${packageInfo.combinedOptions.tag}.`);
 
     let result;
@@ -94,10 +99,10 @@ export async function publishToRegistry(originalBumpInfo: BumpInfo, options: Bea
   }
 
   // if there is a postpublish hook perform a postpublish pass, calling the routine on each package
-  const postpublishHook = options.hooks?.postpublish;
+  const postpublishHook = hooks?.postpublish;
   if (postpublishHook) {
     for (const pkg of packagesToPublish) {
-      const packageInfo = bumpInfo.packageInfos[pkg];
+      const packageInfo = packageInfos[pkg];
       const maybeAwait = postpublishHook(
         path.dirname(packageInfo.packageJsonPath),
         packageInfo.name,

@@ -1,20 +1,24 @@
 import { unlinkChangeFiles } from '../changefile/unlinkChangeFiles';
 import { writeChangelog } from '../changelog/writeChangelog';
 import fs from 'fs-extra';
-import { BumpInfo } from '../types/BumpInfo';
+import { BumpInfo, PackageVersionInfos } from '../types/BumpInfo';
 import { BeachballOptions } from '../types/BeachballOptions';
-import { PackageDeps, PackageInfos } from '../types/PackageInfo';
+import { PackageDeps } from 'workspace-tools';
+import { Immutable } from '../types/Immutable';
 
-export function writePackageJson(modifiedPackages: Set<string>, packageInfos: PackageInfos) {
+export function writePackageJson(
+  modifiedPackages: ReadonlySet<string>,
+  packageInfos: Immutable<PackageVersionInfos>
+) {
   for (const pkgName of modifiedPackages) {
     const info = packageInfos[pkgName];
     const packageJson = fs.readJSONSync(info.packageJsonPath);
 
     packageJson.version = info.version;
 
-    ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depKind => {
+    (['dependencies', 'devDependencies', 'peerDependencies'] as const).forEach(depKind => {
       // updatedDeps contains all of the dependencies in the bump info since the beginning of a build job
-      const updatedDepsVersions: PackageDeps | undefined = (info as any)[depKind];
+      const updatedDepsVersions: PackageDeps | undefined = info[depKind];
       if (updatedDepsVersions) {
         // to be cautious, only update internal && modifiedPackages, since some other dependency
         // changes could have occurred since the beginning of the build job and the next merge step
@@ -38,18 +42,18 @@ export function writePackageJson(modifiedPackages: Set<string>, packageInfos: Pa
  *
  * deletes change files, update package.json, and changelogs
  */
-export async function performBump(bumpInfo: BumpInfo, options: BeachballOptions) {
-  const { modifiedPackages, packageInfos, changes, dependentChangeInfos } = bumpInfo;
+export async function performBump(bumpInfo: Immutable<BumpInfo>, options: Immutable<BeachballOptions>) {
+  const { modifiedPackages, updatedPackageInfos, changes, dependentChangeInfos } = bumpInfo;
 
-  writePackageJson(modifiedPackages, packageInfos);
+  writePackageJson(modifiedPackages, updatedPackageInfos);
 
   if (options.generateChangelog) {
     // Generate changelog
-    await writeChangelog(options, changes, dependentChangeInfos, packageInfos);
+    await writeChangelog(options, changes, dependentChangeInfos, updatedPackageInfos);
   }
 
   if (!options.keepChangeFiles) {
     // Unlink changelogs
-    unlinkChangeFiles(changes, packageInfos, options.path);
+    unlinkChangeFiles(changes, updatedPackageInfos, options.path);
   }
 }

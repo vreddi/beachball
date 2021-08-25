@@ -46,7 +46,7 @@ export class Registry {
   }
 
   private async startWithPort(port: number) {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.server = spawn(process.execPath, [verdaccioApi, port.toString()]);
 
       this.server.stdout.on('data', data => {

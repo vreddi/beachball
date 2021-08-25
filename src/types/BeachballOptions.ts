@@ -2,103 +2,124 @@ import { ChangeType } from './ChangeInfo';
 import { ChangeFilePromptOptions } from './ChangeFilePrompt';
 import { ChangelogOptions } from './ChangelogOptions';
 
-export type BeachballOptions = CliOptions & RepoOptions & PackageOptions;
+// export interface BetterOptions {
+//   cwd: string;
+//   defaultOptions: Partial<BeachballOptions>;
+//   cliOptions: CliOptions;
+//   repoOptions: RepoOptions;
+//   packageOptions?: PackageOptions;
+// }
+export type BeachballOptions = CommonOptions &
+  InferredOptions &
+  RepoOptions &
+  PackageOptions &
+  Omit<CliOptions, 'command' | 'help' | 'version'>;
 
-export interface CliOptions {
-  all: boolean;
-  branch: string;
-  command: string;
-  message: string;
+export interface InferredOptions {
+  /** Project root, used for running commands and looking for packages */
   path: string;
-  registry: string;
-  gitTags: boolean;
-  tag: string;
-  token: string;
-  push: boolean;
-  publish: boolean;
-  bumpDeps: boolean;
-  fetch: boolean;
-  yes: boolean;
-  new: boolean;
-  access: 'public' | 'restricted';
-  package: string;
-  changehint: string;
+}
+
+/** These can be specified in repo-level configs or on the command line. */
+export interface CommonOptions {
+  /**
+   * Branch to compare against. In the final options, this will have format `remoteName/branchName`.
+   * On the command line or in repo options, the remote name can be omitted.
+   */
+  branch: string;
+
+  registry?: string;
+  gitTags?: boolean;
+  tag?: string;
+  push?: boolean;
+  publish?: boolean;
+  bumpDeps?: boolean;
+  fetch?: boolean;
+  access?: 'public' | 'restricted';
+  changehint?: string;
+  /** number of retries for a package publish before failing */
   retries: number;
-  type?: ChangeType | null;
+  disallowedChangeTypes?: ChangeType[];
+}
+
+export interface CliOptions extends Partial<CommonOptions> {
+  // CLI-specific options processed at top level
+  /** command to run */
+  command?: string;
+  /** show help and exit */
   help?: boolean;
+  /** show version and exit */
   version?: boolean;
-  scope?: string[] | null;
+
+  // other options
+  all?: boolean;
+  /** For `change` command, message for the change file. For `publish` command, commit message. */
+  message?: string;
+  token?: string;
+  yes?: boolean;
+  new?: boolean;
+  package?: string;
+  type?: ChangeType;
+  scope?: string[];
   timeout?: number;
   fromRef?: string;
   keepChangeFiles?: boolean;
-  bump: boolean;
-  canaryName?: string | undefined;
+  bump?: boolean;
+  canaryName?: string;
   forceVersions?: boolean;
-  disallowedChangeTypes: ChangeType[] | null;
-  dependentChangeType: ChangeType | null;
+  dependentChangeType?: ChangeType;
   disallowDeletedChangeFiles?: boolean;
-  prereleasePrefix?: string | null;
+  prereleasePrefix?: string;
   configPath?: string;
   commit?: boolean;
 }
 
-export interface RepoOptions {
-  branch: string;
-  message: string;
-  path: string;
-  registry: string;
-  gitTags: boolean;
-  tag: string;
-  push: boolean;
-  publish: boolean;
-  bumpDeps: boolean;
-  fetch: boolean;
-  access: 'public' | 'restricted';
-  changehint: string;
-  disallowedChangeTypes: ChangeType[] | null;
-  defaultNpmTag: string;
-  generateChangelog: boolean;
+export interface RepoHooks {
+  /**
+   * Runs for each package after version bumps have been processed and committed to git, but before the actual
+   * publish command.
+   *
+   * This allows for file modifications which will be reflected in the published package but not be reflected in the
+   * repository.
+   */
+  prepublish?: (packagePath: string, name: string, version: string) => void | Promise<void>;
 
-  /** number of retries for a package publish before failing */
-  retries: number;
-  groups?: VersionGroupOptions[];
+  /**
+   * Runs for each package after the publish command.
+   * Any file changes made in this step will **not** be committed automatically.
+   */
+  postpublish?: (packagePath: string, name: string, version: string) => void | Promise<void>;
+}
+
+export interface RepoOptions extends Partial<CommonOptions> {
+  defaultNpmTag?: string;
+  generateChangelog?: boolean;
+
+  groups?: VersionGroup[];
   changelog?: ChangelogOptions;
   changeFilePrompt?: ChangeFilePromptOptions;
 
-  hooks?: {
-    /**
-     * Runs for each package after version bumps have been processed and committed to git, but before the actual
-     * publish command.
-     *
-     * This allows for file modifications which will be reflected in the published package but not be reflected in the
-     * repository.
-     */
-    prepublish?: (packagePath: string, name: string, version: string) => void | Promise<void>;
-
-    /**
-     * Runs for each package after the publish command.
-     * Any file changes made in this step will **not** be committed automatically.
-     */
-    postpublish?: (packagePath: string, name: string, version: string) => void | Promise<void>;
-  };
+  hooks?: RepoHooks;
 }
 
 export interface PackageOptions {
-  gitTags: boolean;
-  disallowedChangeTypes: ChangeType[] | null;
-  tag: string | null;
-  defaultNpmTag: string;
+  gitTags?: boolean;
+  disallowedChangeTypes?: ChangeType[];
+  tag?: string;
+  defaultNpmTag?: string;
   changeFilePrompt?: ChangeFilePromptOptions;
+  // For new properties to be respected, they MUST ALSO BE ADDED TO ...........
 }
 
-export interface VersionGroupOptions {
+// For new properties to be respected, they MUST ALSO BE ADDED TO ...........
+export type VersionGroupOptions = Pick<PackageOptions, 'disallowedChangeTypes'>;
+
+export interface VersionGroup extends VersionGroupOptions {
   /** minimatch pattern (or array of minimatch) to detect which packages should be included in this group */
   include: string | string[];
 
   /** minimatch pattern (or array of minimatch) to detect which packages should be excluded in this group */
   exclude?: string | string[];
-
-  disallowedChangeTypes: ChangeType[] | null;
 
   /** name of the version group */
   name: string;

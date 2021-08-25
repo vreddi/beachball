@@ -1,5 +1,5 @@
 import toposort from 'toposort';
-import { PackageInfos, PackageDeps } from '../types/PackageInfo';
+import { PackageDeps, PackageInfo } from 'workspace-tools';
 
 /**
  * Topological sort the packages based on its dependency graph.
@@ -7,7 +7,10 @@ import { PackageInfos, PackageDeps } from '../types/PackageInfo';
  * @param packages Packages to be sorted.
  * @param packageInfos PackagesInfos for the sorted packages.
  */
-export function toposortPackages(packages: string[], packageInfos: PackageInfos): string[] {
+export function toposortPackages(
+  packages: string[],
+  packageInfos: { [packageName: string]: Pick<PackageInfo, 'dependencies' | 'devDependencies' | 'peerDependencies'> }
+): string[] {
   const packageSet = new Set(packages);
   const dependencyGraph: [string | undefined, string][] = [];
 

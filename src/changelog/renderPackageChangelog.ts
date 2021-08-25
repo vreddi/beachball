@@ -2,6 +2,7 @@ import { ChangelogEntry } from '../types/ChangeLog';
 import _ from 'lodash';
 import { PackageChangelogRenderInfo, ChangelogRenderers } from '../types/ChangelogOptions';
 import { ChangeType } from '../types/ChangeInfo';
+import { Immutable } from '../types/Immutable';
 
 const groupNames: { [k in ChangeType]: string } = {
   major: 'Major changes',
@@ -11,7 +12,7 @@ const groupNames: { [k in ChangeType]: string } = {
   none: '', // not used
 };
 
-export const defaultRenderers: Required<ChangelogRenderers> = {
+export const defaultRenderers: Immutable<Required<ChangelogRenderers>> = {
   renderHeader: _renderHeader,
   renderChangeTypeSection: _renderChangeTypeSection,
   renderChangeTypeHeader: _renderChangeTypeHeader,
@@ -19,7 +20,7 @@ export const defaultRenderers: Required<ChangelogRenderers> = {
   renderEntry: _renderEntry,
 };
 
-export async function renderPackageChangelog(renderInfo: PackageChangelogRenderInfo): Promise<string> {
+export async function renderPackageChangelog(renderInfo: Immutable<PackageChangelogRenderInfo>): Promise<string> {
   const { renderHeader, renderChangeTypeSection } = renderInfo.renderers;
   const versionHeader = await renderHeader(renderInfo);
 
@@ -34,13 +35,13 @@ export async function renderPackageChangelog(renderInfo: PackageChangelogRenderI
     .join('\n\n');
 }
 
-async function _renderHeader(renderInfo: PackageChangelogRenderInfo): Promise<string> {
+async function _renderHeader(renderInfo: Immutable<PackageChangelogRenderInfo>): Promise<string> {
   return `## ${renderInfo.newVersionChangelog.version}\n\n${renderInfo.newVersionChangelog.date.toUTCString()}`;
 }
 
 async function _renderChangeTypeSection(
   changeType: ChangeType,
-  renderInfo: PackageChangelogRenderInfo
+  renderInfo: Immutable<PackageChangelogRenderInfo>
 ): Promise<string> {
   const { renderChangeTypeHeader, renderEntries } = renderInfo.renderers;
   const entries = renderInfo.newVersionChangelog.comments[changeType];
@@ -49,14 +50,14 @@ async function _renderChangeTypeSection(
     : '';
 }
 
-async function _renderChangeTypeHeader(
-  changeType: ChangeType,
-  renderInfo: PackageChangelogRenderInfo
-): Promise<string> {
+async function _renderChangeTypeHeader(changeType: ChangeType): Promise<string> {
   return `### ${groupNames[changeType]}`;
 }
 
-async function _renderEntries(changeType: ChangeType, renderInfo: PackageChangelogRenderInfo): Promise<string> {
+async function _renderEntries(
+  changeType: ChangeType,
+  renderInfo: Immutable<PackageChangelogRenderInfo>
+): Promise<string> {
   const entries = renderInfo.newVersionChangelog.comments[changeType];
   if (!entries || !entries.length) {
     return '';
@@ -79,8 +80,8 @@ async function _renderEntries(changeType: ChangeType, renderInfo: PackageChangel
 }
 
 async function _renderEntriesBasic(
-  entries: ChangelogEntry[],
-  renderInfo: PackageChangelogRenderInfo
+  entries: Immutable<ChangelogEntry[]>,
+  renderInfo: Immutable<PackageChangelogRenderInfo>
 ): Promise<string[]> {
   // Use a for loop here (not map) so that if renderEntry does network requests, we don't fire them all at once
   let results: string[] = [];
@@ -90,6 +91,6 @@ async function _renderEntriesBasic(
   return results;
 }
 
-async function _renderEntry(entry: ChangelogEntry, renderInfo: PackageChangelogRenderInfo): Promise<string> {
+async function _renderEntry(entry: Immutable<ChangelogEntry>): Promise<string> {
   return `- ${entry.comment} (${entry.author})`;
 }

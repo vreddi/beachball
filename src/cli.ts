@@ -6,24 +6,28 @@ import { publish } from './commands/publish';
 import { sync } from './commands/sync';
 
 import { showVersion, showHelp } from './help';
-import { getOptions } from './options/getOptions';
+import { BeachballOptions2 } from './options/BeachballOptions2';
+import { getCliOptions } from './options/getCliOptions';
+import { findProjectRoot } from './paths';
 import { validate } from './validation/validate';
 
 (async () => {
-  const options = getOptions(process.argv);
+  const root = findProjectRoot(process.cwd()) || process.cwd();
+  const cliOptions = getCliOptions(process.argv, root);
+  const options = new BeachballOptions2(process.argv, root);
 
-  if (options.help) {
+  if (cliOptions.help) {
     showHelp();
     process.exit(0);
   }
 
-  if (options.version) {
+  if (cliOptions.version) {
     showVersion();
     process.exit(0);
   }
 
   // Run the commands
-  switch (options.command) {
+  switch (cliOptions.command) {
     case 'check':
       validate(options);
       console.log('No change files are needed');
@@ -33,7 +37,9 @@ import { validate } from './validation/validate';
       validate(options, { allowFetching: false });
 
       // set a default publish message
-      options.message = options.message || 'applying package updates';
+      if (!options.message) {
+        options.addOverride('message', 'applying package updates');
+      }
       await publish(options);
       break;
 

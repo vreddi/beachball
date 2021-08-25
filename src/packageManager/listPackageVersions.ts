@@ -1,6 +1,5 @@
 import { npmAsync } from './npm';
 import pLimit from 'p-limit';
-import { PackageInfo } from '../types/PackageInfo';
 
 const packageVersions: { [pkgName: string]: any } = {};
 

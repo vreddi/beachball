@@ -1,5 +1,6 @@
 import { ChangelogJson, PackageChangelog, ChangelogEntry } from './ChangeLog';
 import { ChangeType } from './ChangeInfo';
+import { Immutable } from './Immutable';
 
 /**
  * Options for changelog-related configuration.
@@ -10,14 +11,14 @@ import { ChangeType } from './ChangeInfo';
  */
 export interface ChangelogOptions {
   /** Options for grouping packages together in a single changelog. */
-  groups?: ChangelogGroupOptions[];
+  groups?: Immutable<ChangelogGroupOptions[]>;
 
   /**
    * Use this for full custom rendering of the entire changelog markdown for a particular package version.
    * Default renderers (and `customRenderers` if provided) will be available in `renderInfo.renderers`
    * but will not be called automatically.
    */
-  renderPackageChangelog?: (renderInfo: PackageChangelogRenderInfo) => Promise<string>;
+  renderPackageChangelog?: (renderInfo: Immutable<PackageChangelogRenderInfo>) => Promise<string>;
 
   /**
    * Fine-grained custom renderers for individual parts of the changelog.
@@ -50,10 +51,10 @@ export interface ChangelogGroupOptions {
  */
 export interface PackageChangelogRenderInfo {
   /** Existing json in CHANGELOG.json.  */
-  previousJson: ChangelogJson | undefined;
+  previousJson: Immutable<ChangelogJson> | undefined;
 
   /** Changelog for a package version that is going to be added to full changelog. */
-  newVersionChangelog: PackageChangelog;
+  newVersionChangelog: Immutable<PackageChangelog>;
 
   /** True if this is a grouped changelog. */
   isGrouped: boolean;
@@ -63,7 +64,7 @@ export interface PackageChangelogRenderInfo {
    * If any custom renderers were provided in `ChangelogOptions.customRenderers`, they will be included here.
    * Default renderers will be included in cases where a custom option wasn't provided.
    */
-  renderers: Required<ChangelogRenderers>;
+  renderers: Required<Immutable<ChangelogRenderers>>;
 }
 
 export interface ChangelogRenderers {
@@ -76,7 +77,7 @@ export interface ChangelogRenderers {
    * Wed, 25 Mar 2020 20:20:02 GMT
    * ```
    */
-  renderHeader?: (renderInfo: PackageChangelogRenderInfo) => Promise<string>;
+  renderHeader?: (renderInfo: Immutable<PackageChangelogRenderInfo>) => Promise<string>;
 
   /**
    * Custom renderer for the section about `changeType` changes for a particular package version.
@@ -88,7 +89,10 @@ export interface ChangelogRenderers {
    * - Really interesting change (user1@microsoft.com)
    * ```
    */
-  renderChangeTypeSection?: (changeType: ChangeType, renderInfo: PackageChangelogRenderInfo) => Promise<string>;
+  renderChangeTypeSection?: (
+    changeType: ChangeType,
+    renderInfo: Immutable<PackageChangelogRenderInfo>
+  ) => Promise<string>;
 
   /**
    * Custom renderer for the section header about `changeType` changes for a particular package version.
@@ -98,7 +102,10 @@ export interface ChangelogRenderers {
    * ### Minor changes
    * ```
    */
-  renderChangeTypeHeader?: (changeType: ChangeType, renderInfo: PackageChangelogRenderInfo) => Promise<string>;
+  renderChangeTypeHeader?: (
+    changeType: ChangeType,
+    renderInfo: Immutable<PackageChangelogRenderInfo>
+  ) => Promise<string>;
 
   /**
    * Custom renderer for the list of `changeType` changes (not including the change type header)
@@ -118,7 +125,7 @@ export interface ChangelogRenderers {
    *   - Boring change (user2@microsoft.com)
    * ```
    */
-  renderEntries?: (changeType: ChangeType, renderInfo: PackageChangelogRenderInfo) => Promise<string>;
+  renderEntries?: (changeType: ChangeType, renderInfo: Immutable<PackageChangelogRenderInfo>) => Promise<string>;
 
   /**
    * Custom renderer for an individual change entry.
@@ -128,5 +135,5 @@ export interface ChangelogRenderers {
    * - Really interesting change (user1@microsoft.com)
    * ```
    */
-  renderEntry?: (entry: ChangelogEntry, renderInfo: PackageChangelogRenderInfo) => Promise<string>;
+  renderEntry?: (entry: ChangelogEntry, renderInfo: Immutable<PackageChangelogRenderInfo>) => Promise<string>;
 }

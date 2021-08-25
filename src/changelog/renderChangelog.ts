@@ -1,10 +1,11 @@
 import { PackageChangelog } from '../types/ChangeLog';
 import { renderPackageChangelog, defaultRenderers } from './renderPackageChangelog';
 import { ChangelogOptions, PackageChangelogRenderInfo } from '../types/ChangelogOptions';
+import { Immutable } from '../types/Immutable';
 
 export interface MarkdownChangelogRenderOptions extends Omit<PackageChangelogRenderInfo, 'renderers'> {
   previousContent: string;
-  changelogOptions: ChangelogOptions;
+  changelogOptions: Immutable<ChangelogOptions>;
 }
 
 export const markerComment = '<!-- Start content -->';
@@ -34,7 +35,7 @@ export async function renderChangelog(renderOptions: MarkdownChangelogRenderOpti
       console.log('Using custom renderer for package version changelog.');
     }
 
-    const renderInfo: PackageChangelogRenderInfo = {
+    const renderInfo: Immutable<PackageChangelogRenderInfo> = {
       previousJson,
       newVersionChangelog,
       isGrouped,
@@ -60,7 +61,7 @@ export async function renderChangelog(renderOptions: MarkdownChangelogRenderOpti
   }
 }
 
-function renderChangelogHeader(changelog: PackageChangelog): string {
+function renderChangelogHeader(changelog: Immutable<PackageChangelog>): string {
   return (
     `# Change Log - ${changelog.name}\n\n` +
     `This log was last generated on ${changelog.date.toUTCString()} and should not be manually modified.`

@@ -1,7 +1,7 @@
 import { gatherBumpInfo } from '../bump/gatherBumpInfo';
 import { performBump } from '../bump/performBump';
-import { BeachballOptions } from '../types/BeachballOptions';
+import { BeachballOptions2 } from '../options/BeachballOptions2';
 
-export async function bump(options: BeachballOptions) {
+export async function bump(options: BeachballOptions2) {
   return await performBump(gatherBumpInfo(options), options);
 }

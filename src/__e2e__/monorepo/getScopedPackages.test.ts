@@ -22,11 +22,11 @@ describe('getScopedPackages', () => {
       scope: ['packages/grouped/*'],
     } as BeachballOptions);
 
-    expect(scopedPackages.includes('a')).toBeTruthy();
-    expect(scopedPackages.includes('b')).toBeTruthy();
+    expect(scopedPackages.has('a')).toBeTruthy();
+    expect(scopedPackages.has('b')).toBeTruthy();
 
-    expect(scopedPackages.includes('foo')).toBeFalsy();
-    expect(scopedPackages.includes('bar')).toBeFalsy();
+    expect(scopedPackages.has('foo')).toBeFalsy();
+    expect(scopedPackages.has('bar')).toBeFalsy();
   });
 
   it('can scope with excluded packages', async () => {
@@ -35,11 +35,11 @@ describe('getScopedPackages', () => {
       scope: ['!packages/grouped/*'],
     } as BeachballOptions);
 
-    expect(scopedPackages.includes('a')).toBeFalsy();
-    expect(scopedPackages.includes('b')).toBeFalsy();
+    expect(scopedPackages.has('a')).toBeFalsy();
+    expect(scopedPackages.has('b')).toBeFalsy();
 
-    expect(scopedPackages.includes('foo')).toBeTruthy();
-    expect(scopedPackages.includes('bar')).toBeTruthy();
+    expect(scopedPackages.has('foo')).toBeTruthy();
+    expect(scopedPackages.has('bar')).toBeTruthy();
   });
 
   it('can mix and match with excluded packages', async () => {
@@ -48,10 +48,10 @@ describe('getScopedPackages', () => {
       scope: ['packages/b*', '!packages/grouped/*'],
     } as BeachballOptions);
 
-    expect(scopedPackages.includes('a')).toBeFalsy();
-    expect(scopedPackages.includes('b')).toBeFalsy();
+    expect(scopedPackages.has('a')).toBeFalsy();
+    expect(scopedPackages.has('b')).toBeFalsy();
 
-    expect(scopedPackages.includes('foo')).toBeFalsy();
-    expect(scopedPackages.includes('bar')).toBeTruthy();
+    expect(scopedPackages.has('foo')).toBeFalsy();
+    expect(scopedPackages.has('bar')).toBeTruthy();
   });
 });

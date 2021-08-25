@@ -1,6 +1,7 @@
 import { ChangelogOptions, ChangelogGroupOptions } from '../types/ChangelogOptions';
+import { Immutable } from '../types/Immutable';
 
-export function isValidChangelogOptions(options: ChangelogOptions): boolean {
+export function isValidChangelogOptions(options: Immutable<ChangelogOptions>): boolean {
   if (options.groups) {
     if (!isValidChangelogGroupOptions(options.groups)) {
       return false;
@@ -9,7 +10,7 @@ export function isValidChangelogOptions(options: ChangelogOptions): boolean {
   return true;
 }
 
-function isValidChangelogGroupOptions(groupOptions: ChangelogGroupOptions[]): boolean {
+function isValidChangelogGroupOptions(groupOptions: Immutable<ChangelogGroupOptions[]>): boolean {
   for (const options of groupOptions) {
     if (!options.changelogPath) {
       console.log('changelog group options cannot contain empty changelogPath.');

@@ -30,13 +30,18 @@ export function findGitRoot(cwd: string) {
   return searchUp('.git', cwd);
 }
 
-export function findProjectRoot(cwd: string) {
-  let workspaceRoot: string | undefined;
+export function findProjectRoot(cwd: string): string {
+  let workspaceRoot: string | null | undefined;
   try {
     workspaceRoot = getWorkspaceRoot(cwd);
   } catch {}
 
-  return workspaceRoot || findGitRoot(cwd);
+  workspaceRoot = workspaceRoot || findGitRoot(cwd);
+
+  if (!workspaceRoot) {
+    throw new Error(`Could not find workspace or git root relative to ${cwd}`);
+  }
+  return workspaceRoot;
 }
 
 export function findPackageRoot(cwd: string) {
@@ -44,13 +49,7 @@ export function findPackageRoot(cwd: string) {
 }
 
 export function getChangePath(cwd: string) {
-  const root = findProjectRoot(cwd);
-
-  if (root) {
-    return path.join(root, 'change');
-  }
-
-  return null;
+  return path.join(findProjectRoot(cwd), 'change');
 }
 
 export function isChildOf(child: string, parent: string) {

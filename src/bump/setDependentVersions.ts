@@ -1,22 +1,27 @@
-import { PackageInfos, PackageDeps } from '../types/PackageInfo';
+import { PackageVersionInfos } from '../types/BumpInfo';
 import { bumpMinSemverRange } from './bumpMinSemverRange';
 
-export function setDependentVersions(packageInfos: PackageInfos, scopedPackages: Set<string>) {
+/**
+ * Update all version references to within-repo deps to request \>= the current version.
+ * @param updatedPackageInfos Package infos to update (WILL BE MUTATED)
+ * @param scopedPackages Package names that are in scope to update
+ * @returns Names of modified packages
+ */
+export function setDependentVersions(packageInfos: PackageVersionInfos, scopedPackages: ReadonlySet<string>) {
   const modifiedPackages = new Set<string>();
-  Object.keys(packageInfos).forEach(pkgName => {
+  Object.entries(packageInfos).forEach(([pkgName, info]) => {
     if (!scopedPackages.has(pkgName)) {
       return;
     }
 
-    const info = packageInfos[pkgName];
-    ['dependencies', 'devDependencies', 'peerDependencies'].forEach(depKind => {
-      const deps: PackageDeps | undefined = (info as any)[depKind];
+    (['dependencies', 'devDependencies', 'peerDependencies'] as const).forEach(depKind => {
+      const deps = info[depKind];
       if (deps) {
         Object.keys(deps).forEach(dep => {
-          const packageInfo = packageInfos[dep];
-          if (packageInfo) {
+          const depInfo = packageInfos[dep];
+          if (depInfo) {
             const existingVersionRange = deps[dep];
-            const bumpedVersionRange = bumpMinSemverRange(packageInfo.version, existingVersionRange);
+            const bumpedVersionRange = bumpMinSemverRange(depInfo.version, existingVersionRange);
             if (existingVersionRange !== bumpedVersionRange) {
               deps[dep] = bumpedVersionRange;
               modifiedPackages.add(pkgName);
